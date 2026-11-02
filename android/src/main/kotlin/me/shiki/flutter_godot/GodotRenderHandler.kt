@@ -10,9 +10,9 @@ import org.godotengine.godot.plugin.GodotPlugin
 import org.godotengine.godot.plugin.GodotPluginRegistry
 
 /***
- * CreateBy: shiki
- * CreateDate: 2025-10-15
- * Description: [文件描述说明]
+ * 作者： shiki
+ * 创建日期： 2025-10-15
+ * 说明： [文件描述说明]
  ***/
 
 
@@ -229,8 +229,8 @@ class GodotRenderHandler private constructor() :
                 }
 
                 eglManager?.makeCurrent()
-                // Render into the EGL window surface consumed by Flutter Texture.
-                // An offscreen FBO without a blit would never reach that surface.
+                // 将画面渲染到 Flutter Texture 使用的 EGL 窗口表面。
+                // 离屏 FBO 若未复制到窗口表面，画面就无法显示。
 
                 if (activityJustResumed) {
                     GodotLib.onRendererResumed()

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build device/simulator static libraries and package a CocoaPods XCFramework."""
+"""编译真机与模拟器静态库，并打包为 CocoaPods 使用的 XCFramework。"""
 import os
 import shutil
 import subprocess
@@ -47,12 +47,12 @@ def main():
             for name in ("godot_view_controller.h", "godot_view_apple_embedded.h", "app_delegate_service.h"):
                 shutil.copy2(source / "drivers/apple_embedded" / name, headers / name)
             shutil.copy2(source / "LICENSE.txt", package / "LICENSE.txt")
-            # Retain third-party license notices alongside the distributable engine.
+            # 在可分发的引擎产物中保留第三方许可证声明。
             shutil.copy2(source / "COPYRIGHT.txt", package / "COPYRIGHT.txt")
             if framework.exists():
                 shutil.rmtree(framework)
-        # CocoaPods derives -l flags from the library basename. Both slices must
-        # have the same simple name (Godot's SCons names contain arch/simulator).
+        # CocoaPods 根据库文件名生成 -l 链接参数，因此两个切片必须使用
+        # 相同的简短名称，而 Godot 的 SCons 产物名包含架构或模拟器信息。
         staging = package / "staging"
         device_lib = staging / "device/libGodotEngine.a"
         simulator_lib = staging / "simulator/libGodotEngine.a"
@@ -66,8 +66,8 @@ def main():
             if not args.dry_run:
                 destination.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(source_lib, destination)
-                # The upstream export archive includes a standalone SwiftUI @main
-                # app. Library hosts provide their own entry point and lifecycle.
+                # 上游导出归档包含独立 SwiftUI 应用的 @main 入口；
+                # 以库集成时，应由宿主提供入口与生命周期。
                 members = subprocess.check_output(["xcrun", "ar", "-t", str(destination)], text=True).splitlines()
                 entries = [name for name in members if name.startswith("app.ios.") and name.endswith(".o")]
                 if len(entries) != 1:

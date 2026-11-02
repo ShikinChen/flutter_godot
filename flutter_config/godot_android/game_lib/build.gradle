@@ -30,7 +30,7 @@ dependencies {
 
     implementation "androidx.core:core-splashscreen:$versions.splashscreenVersion"
 
-    // Godot user plugins remote dependencies
+    // Godot 用户插件的远程依赖。
     String[] remoteDeps = getGodotPluginsRemoteBinaries()
     if (remoteDeps != null && remoteDeps.size() > 0) {
         for (String dep : remoteDeps) {
@@ -38,19 +38,19 @@ dependencies {
         }
     }
 
-    // Godot user plugins local dependencies
+    // Godot 用户插件的本地依赖。
     String[] pluginsBinaries = getGodotPluginsLocalBinaries()
     if (pluginsBinaries != null && pluginsBinaries.size() > 0) {
         implementation files(pluginsBinaries)
     }
 
-    // Automatically pick up local dependencies in res://addons
+    // 自动收集 res://addons 中的本地依赖。
     String addonsDirectory = getAddonsDirectory()
     if (addonsDirectory != null && !addonsDirectory.isBlank()) {
         implementation fileTree(dir: "$addonsDirectory", include: ['*.jar', '*.aar'])
     }
 
-    // .NET dependencies
+    // .NET 运行时依赖。
     String jar = rootProject.file('../../godot/modules/mono/thirdparty/libSystem.Security.Cryptography.Native.Android.jar').absolutePath
     if (file(jar).exists()) {
         monoImplementation files(jar)
@@ -70,7 +70,7 @@ android {
 
         manifestPlaceholders = [godotLibraryVersion: getGodotLibraryVersionName()]
 
-        // The default ignore pattern for the 'assets' directory includes hidden files and directories which are used by Godot projects.
+        // assets 目录的默认忽略规则会排除 Godot 使用的隐藏文件和目录，此处调整规则以保留它们。
         aaptOptions {
             ignoreAssetsPattern "!.svn:!.git:!.gitignore:!.ds_store:!*.scc:<dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"
         }
@@ -126,7 +126,7 @@ android {
         exclude 'META-INF/LICENSE'
         exclude 'META-INF/NOTICE'
 
-        // Debug symbols are kept for development within Android Studio.
+        // 保留调试符号，供 Android Studio 开发调试使用。
         if (shouldNotStrip()) {
             jniLibs {
                 keepDebugSymbols += '**/*.so'
@@ -134,14 +134,14 @@ android {
         }
 
         jniLibs {
-            // Setting this to true causes AGP to package compressed native libraries when building the app
-            // For more background, see:
+            // 设置为 true 时，AGP 会在构建应用时压缩打包原生库。
+            // 背景说明参见：
             // - https://developer.android.com/build/releases/past-releases/agp-3-6-0-release-notes#extractNativeLibs
             // - https://stackoverflow.com/a/44704840
             useLegacyPackaging shouldUseLegacyPackaging()
         }
 
-        // Always select Godot's version of libc++_shared.so in case deps have their own
+        // 依赖中也包含 libc++_shared.so 时，统一选用 Godot 的版本。
         pickFirst 'lib/x86/libc++_shared.so'
         pickFirst 'lib/x86_64/libc++_shared.so'
         pickFirst 'lib/armeabi-v7a/libc++_shared.so'

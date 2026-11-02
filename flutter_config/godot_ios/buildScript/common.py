@@ -1,4 +1,4 @@
-"""Shared paths and subprocess handling. No shell expansion or cwd assumptions."""
+"""共用的路径与子进程处理逻辑，不依赖 shell 展开或当前工作目录。"""
 import argparse
 import shlex
 import subprocess

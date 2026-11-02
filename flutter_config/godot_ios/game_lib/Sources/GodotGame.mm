@@ -8,8 +8,8 @@
 extern int apple_embedded_main(int argc, char **argv);
 extern "C" bool FGSendPlatformEvent(const char *json);
 
-// Standard iOS export normally generates these. This package uses a custom
-// engine module and has no external .gdip plugins.
+// 标准 iOS 导出通常会生成这些函数；本包使用自定义
+// 引擎模块，不包含外部 .gdip 插件。
 void godot_apple_embedded_plugins_initialize() {}
 void godot_apple_embedded_plugins_deinitialize() {}
 
@@ -32,7 +32,7 @@ NSNotificationName const GodotGameEventNotification = @"GodotGameEvent";
 @implementation FGGameController
 - (BOOL)godotViewFinishedSetup:(GDTView *)view {
     BOOL ready = [super godotViewFinishedSetup:view];
-    // Godot's iOS GLES layer defaults to opaque even with a transparent viewport.
+    // 即使 viewport 已透明，Godot 的 iOS GLES 图层默认仍为不透明。
     view.opaque = NO;
     view.layer.opaque = NO;
     view.renderingLayer.opaque = NO;
@@ -61,7 +61,7 @@ NSNotificationName const GodotGameEventNotification = @"GodotGameEvent";
     else if ([[NSBundle mainBundle] objectForInfoDictionaryKey:@"godot_cmdline"]) failure = @"Remove godot_cmdline from the host Info.plist; arguments are managed by GodotGame.";
     if (!failure) {
         self.attempted = YES;
-        // main_ios keeps a 64-entry argument buffer. Keep this fixed list small.
+        // main_ios 的参数缓冲区最多容纳 64 项，此固定列表应保持精简。
         std::vector<std::string> args = { NSBundle.mainBundle.executablePath.UTF8String,
             "--main-pack", pack.UTF8String, "--rendering-method", "gl_compatibility",
             "--rendering-driver", "opengl3" };

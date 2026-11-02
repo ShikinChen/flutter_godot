@@ -3,9 +3,9 @@ import 'package:flutter/services.dart';
 
 import 'flutter_godot_platform_interface.dart';
 
-/// An implementation of [FlutterGodotPlatform] that uses method channels.
+/// 通过方法通道实现 [FlutterGodotPlatform]。
 class MethodChannelFlutterGodot extends FlutterGodotPlatform {
-  /// The method channel used to interact with the native platform.
+  /// 用于与原生平台通信的方法通道。
   @visibleForTesting
   final methodChannel = const MethodChannel('flutter_godot');
 

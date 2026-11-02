@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Optional regeneration; the generated project is committed. Requires xcodeproj.
+# 可选的工程重新生成脚本；生成工程已提交，运行此脚本需要 xcodeproj。
 require 'xcodeproj'
 require 'fileutils'
 Dir.chdir(__dir__) do

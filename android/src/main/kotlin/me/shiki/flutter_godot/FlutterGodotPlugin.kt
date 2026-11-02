@@ -187,7 +187,7 @@ class FlutterGodotPlugin :
     private fun onDestroy() {
         if (playerMap.isEmpty()) return
         sessionReleased = true
-        // Stop drawing and destroy EGL on the render thread before releasing the producer.
+        // 先在渲染线程停止绘制并销毁 EGL，再释放纹理生产者。
         val producers = surfaceProducerMap.values.toList()
         val players = playerMap.values.toList()
         surfaceProducerMap.clear()

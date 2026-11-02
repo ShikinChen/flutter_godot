@@ -5,9 +5,9 @@ import java.nio.charset.StandardCharsets
 import java.util.ArrayList
 
 /***
- * CreateBy: shiki
- * CreateDate: 2025-10-20
- * Description: [文件描述说明]
+ * 作者： shiki
+ * 创建日期： 2025-10-20
+ * 说明： [文件描述说明]
  ***/
 
 
@@ -41,7 +41,7 @@ object GodotCommandLineFileParser {
             }
             cmdline
         } catch (e: Exception) {
-            // The _cl_ file can be missing with no adverse effect
+            // 允许缺少 _cl_ 命令行参数文件，不影响默认启动。
             mutableListOf()
         }
     }

@@ -1,4 +1,4 @@
-// Non functional android library used to provide Android Studio editor support to the project.
+// 仅用于为项目提供 Android Studio 编辑支持的占位 Android 库。
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
@@ -61,8 +61,8 @@ android {
             taskPrefix = project.path + ":"
         }
 
-        // Disable the externalNativeBuild* task as it would cause build failures since the cmake build
-        // files is only setup for editing support.
+        // 禁用 externalNativeBuild* 任务；CMake 配置仅用于编辑支持，
+        // 实际执行这些构建任务会导致失败。
         gradle.startParameter.excludedTaskNames += taskPrefix + "externalNativeBuild" + buildType
     }
 }

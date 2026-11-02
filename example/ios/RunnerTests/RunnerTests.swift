@@ -2,14 +2,14 @@ import Flutter
 import UIKit
 import XCTest
 
-// If your plugin has been explicitly set to "type: .dynamic" in the Package.swift,
-// you will need to add your plugin as a dependency of RunnerTests within Xcode.
+// 若插件在 Package.swift 中显式设置为 type: .dynamic，
+// 需要在 Xcode 中将插件添加为 RunnerTests 的依赖。
 
 @testable import flutter_godot
 
-// This demonstrates a simple unit test of the Swift portion of this plugin's implementation.
+// 此测试用于验证插件 Swift 实现的基本行为。
 //
-// See https://developer.apple.com/documentation/xctest for more information about using XCTest.
+// XCTest 使用说明参见 https://developer.apple.com/documentation/xctest。
 
 class RunnerTests: XCTestCase {
 

@@ -80,7 +80,7 @@ android {
         exclude 'META-INF/LICENSE'
         exclude 'META-INF/NOTICE'
 
-        // Debug symbols are kept for development within Android Studio.
+        // 保留调试符号，供 Android Studio 开发调试使用。
         if (shouldNotStrip()) {
             jniLibs {
                 keepDebugSymbols += '**/*.so'
@@ -102,7 +102,7 @@ android {
         dev.jniLibs.srcDirs = ['libs/dev']
         release.jniLibs.srcDirs = ['libs/release']
 
-        // Editor jni library
+        // 编辑器 JNI 库。
 //        editorRelease.jniLibs.srcDirs = ['libs/tools/release']
 //        editorDebug.jniLibs.srcDirs = ['libs/tools/debug']
 //        editorDev.jniLibs.srcDirs = ['libs/tools/dev']
@@ -127,7 +127,7 @@ android {
 
         def sconsTarget = flavorName
         if (sconsTarget == "template") {
-            // Tests are not supported on template builds
+            // 导出模板构建不支持运行测试。
             runTests = false
             switch (buildType) {
                 case "release":
@@ -141,7 +141,7 @@ android {
             }
         }
 
-        // Update the name of the generated library
+        // 更新生成的库文件名称。
         def outputSuffix = "${sconsTarget}"
         if (devBuild) {
             outputSuffix = "${outputSuffix}.dev"
@@ -150,7 +150,7 @@ android {
             output.outputFileName = "godot-lib.${outputSuffix}.aar"
         }
 
-        // Find scons' executable path
+        // 查找 SCons 可执行文件路径。
         File sconsExecutableFile = null
         def sconsName = "scons"
         def sconsExts = (org.gradle.internal.os.OperatingSystem.current().isWindows()
@@ -162,13 +162,13 @@ android {
             logger.debug("Checking $sconsNameExt")
             sconsExecutableFile = org.gradle.internal.os.OperatingSystem.current().findInPath(sconsNameExt)
             if (sconsExecutableFile != null) {
-                // We're done!
+                // 已找到，结束查找。
                 break
             }
-            // Check all the options in path
+            // 检查 PATH 中的所有候选路径。
             List<File> allOptions = org.gradle.internal.os.OperatingSystem.current().findAllInPath(sconsNameExt)
             if (!allOptions.isEmpty()) {
-                // Pick the first option and we're done!
+                // 选用第一个可用路径并结束查找。
                 sconsExecutableFile = allOptions.get(0)
                 break
             }
@@ -184,7 +184,7 @@ android {
                 throw new GradleException("Invalid selected abi: $selectedAbi")
             }
 
-            // Creating gradle task to generate the native libraries for the selected abi.
+            // 创建 Gradle 任务，为选定 ABI 生成原生库。
             def taskName = getSconsTaskName(flavorName, buildType, selectedAbi)
             def androidAbi = getAndroidAbi(selectedAbi)
             def outputDir = file("libs/${buildType}/${androidAbi}")
@@ -323,7 +323,7 @@ android {
                 }
             }
 
-            // Schedule the tasks so the generated libs are present before the aar file is packaged.
+            // 安排任务顺序，确保打包 AAR 前已生成所需原生库。
             tasks["merge${flavorName.capitalize()}${buildType.capitalize()}JniLibFolders"].dependsOn taskName
         }
     }

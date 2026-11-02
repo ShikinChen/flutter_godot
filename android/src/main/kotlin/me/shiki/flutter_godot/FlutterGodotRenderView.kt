@@ -5,9 +5,9 @@ import org.godotengine.godot.GodotRenderView
 import org.godotengine.godot.input.GodotInputHandler
 
 /***
- * CreateBy: shiki
- * CreateDate: 2025-10-23
- * Description: 空实现 godot 一定需要 RenderView
+ * 作者： shiki
+ * 创建日期： 2025-10-23
+ * 说明： 空实现 godot 一定需要 RenderView
  ***/
 
 

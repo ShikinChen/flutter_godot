@@ -31,7 +31,7 @@ public class FlutterGodotPlugin: NSObject, FlutterPlugin {
       }
       do {
         try view.start()
-        // This ID identifies a native view on iOS; it is never a Flutter texture.
+        // 此 ID 在 iOS 上标识原生视图，并非 Flutter 纹理。
         result(["textureId": view.viewId])
       } catch {
         result(FlutterError(code: "godot_init_failed", message: error.localizedDescription, details: nil))

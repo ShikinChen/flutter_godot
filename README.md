@@ -1,51 +1,296 @@
 # flutter_godot
 
-将 Godot 游戏嵌入 Flutter 页面：Android 使用 `Texture`，iOS 使用 `UiKitView`。保留当前 Android 包名 `me.shiki.flutter_godot` 和 MethodChannel 名称 `flutter_godot`。
+将 Godot 游戏嵌入 Flutter 页面，提供统一的 `GodotView`、控制器和平台消息接口。
 
-## 支持范围
+- **Android**：通过 OpenGL ES 3 渲染到 Flutter `Texture`。
+- **iOS**：通过 `UiKitView` 挂载 Godot 原生视图，使用 CocoaPods 集成引擎与游戏产物。
 
-- Android：Godot 引擎初始化、OpenGL ES 3 渲染、Flutter Texture 显示、点击输入、Flutter → Godot 字符串消息。
-- iOS：通过 CocoaPods 引入 GodotEngine / GodotGame，以 UIKit 原生视图显示游戏，支持原生触摸和 Flutter → Godot 消息。尚未实现 iOS Flutter Texture；其他桌面平台和 Web 尚未实现。
-- 当前为单进程单 Godot 会话，只能创建一个 `GodotView`。销毁后需要重启应用再创建，不能同时展示多个实例。
+## 示例与构建工具
 
-## 环境与依赖
+| 项目 | 用途 |
+| --- | --- |
+| [Godot 使用范例](https://github.com/ShikinChen/godot_flutter_example.git) | Godot 游戏工程，配合本插件导出游戏资源和原生产物 |
+| [Flutter 示例](example/lib/main.dart) | 嵌入游戏、设置黄色背景、发送切换场景消息 |
+| [游戏工程初始化](flutter_config/README.md) | 准备 Godot 源码、C# 编译排除项和构建配置 |
+| [Android 构建说明](flutter_config/godot_android/README.md) | 编译引擎、导出游戏、生成 AAR |
+| [iOS 构建说明](flutter_config/godot_ios/README.md) | 编译 XCFramework、导出 PCK 和 C# NativeAOT 产物 |
 
-本项目使用 Flutter 3.47.9 / Dart 3.13.7、Android SDK 36、Java 17，Android 最低 API 24。Android 使用当前项目的 AGP 9.1.0 配置。
+首次获取 Godot 使用范例（已有该工程时无需再次克隆）：
 
-`android/godot/` 按构建类型分别存放游戏和引擎 AAR，与 Godot 构建脚本的按变体输出目录对应：
-
-```text
-android/godot/
-├── debug/
-│   ├── godot_game_lib/    # game_lib-mono-debug.aar
-│   └── godot_lib/         # godot-lib.template_debug.aar
-└── release/
-    ├── godot_game_lib/    # game_lib-mono-release.aar
-    └── godot_lib/         # godot-lib.template_release.aar
+```bash
+git clone https://github.com/ShikinChen/godot_flutter_example.git \
+  /path/to/godot_flutter_example
 ```
 
-Debug 同时使用 debug 游戏和引擎，Release 同时使用 release 游戏和引擎，避免混用游戏资源与原生运行时。四个模块统一使用产物目录之外的 `android/godot_aar.gradle`，因此导出目录无需包含 `build.gradle`，替换产物也不会丢失模块配置。每个模块目录只放一个 AAR，缺少或重复时会明确报错。引擎模块仅导出对应 AAR，旁边的 `arm64-v8a/` 原始构建文件不会额外参与打包。
+本插件消费已构建的 Godot 产物，不会在 `flutter run` 时自动编译引擎或导出游戏。原生产物已加入 Git 忽略规则，首次接入或更换游戏时需先准备对应平台的产物。
 
-当前引擎 AAR 的 manifest 标记为 `custom_build`，渲染适配层已实现其 `blockingExitRenderer(timeout)` 接口。游戏与引擎的实际版本以当前 AAR 为准；重新构建时需统一游戏导出版本、引擎版本与 `flutter_config` 初始化脚本使用的源码版本。
+## 环境要求
 
-这些是源项目现有的构建产物，包含的 ABI 取决于 AAR 内容。使用自己的游戏时，替换游戏 AAR，并保证游戏、Godot Java 接口和原生引擎版本匹配。不要直接替换为任意官方 AAR：当前实现依赖 `initEngine`、`renderView`、`GodotLib` 等接口及输入处理器反射访问。
+| 环境 | 要求 |
+| --- | --- |
+| Flutter / Dart | 当前开发环境为 Flutter 3.47.9 / Dart 3.13.7；Dart SDK 约束为 `^3.13.7` |
+| Android | Android SDK 36、Java 17、最低 API 24；当前使用 AGP 9.1.0 |
+| iOS | macOS、Xcode、CocoaPods，最低 iOS 15 |
+| 游戏构建 | 按对应平台构建说明准备 Godot、Python、C#/.NET 及原生编译工具 |
 
-游戏资源随游戏 AAR 的 Android assets 合并，无需在 Flutter `pubspec.yaml` 再登记。若另行提供 Android assets，必须包含导出游戏所需的完整文件和隐藏目录。
+游戏导出版本、引擎版本和原生接口必须匹配。当前 Android 引擎为 `custom_build`，使用了 `initEngine`、`renderView`、`GodotLib` 等接口，不能直接用任意官方 AAR 替换。
 
-## 接入 Android 应用
+## flutter_config 使用教程
 
-添加本地依赖：
+`flutter_config` 是放在 **Godot 游戏工程内**的构建工具，不是 Flutter 插件依赖。它负责初始化引擎源码、导出游戏资源，并将引擎和游戏打包成 Flutter 可消费的原生产物。
+
+```text
+Godot 游戏工程 + flutter_config
+  ├── Android 构建 → android/out → 插件 android/godot → Gradle
+  └── iOS 构建     → ios/out     → 插件 ios/godot     → CocoaPods
+```
+
+### 1. 复制到 Godot 游戏工程
+
+以下示例以 Godot 游戏工程为基准。路径均为占位示例，请替换为实际目录；游戏与 Flutter 插件可以分别存放，无需位于同一目录：
+
+| 工程 | 路径 |
+| --- | --- |
+| Godot 游戏 | `/path/to/godot_flutter_example` |
+| Flutter 插件 | `/path/to/flutter_godot` |
+
+Godot 工程中的目标结构如下：
+
+```text
+/path/to/godot_flutter_example/
+├── project.godot
+├── godot_flutter_example.csproj
+├── export_presets.cfg
+└── flutter_config/
+    ├── init_project.py
+    ├── godot_android/
+    └── godot_ios/
+```
+
+将插件中的配置复制到游戏工程，再进入游戏根目录：
+
+```bash
+cp -R /path/to/flutter_godot/flutter_config \
+  /path/to/godot_flutter_example/
+cd /path/to/godot_flutter_example
+```
+
+复制后，`flutter_config` 与 `project.godot` 同级。后续游戏构建命令均在 **Godot 游戏工程根目录**执行；如果游戏已经包含该目录，可检查并更新现有配置，无需重复嵌套复制。
+
+### 2. 初始化 Godot 源码与 C# 工程
+
+准备 Python 3.9+、Git，以及与游戏版本匹配的 Godot .NET 编辑器和 .NET SDK。然后执行：
+
+```bash
+cd /path/to/godot_flutter_example
+python3 flutter_config/init_project.py
+```
+
+初始化脚本默认克隆 `4.7.2-stable` 源码到游戏的 `godot/` 目录，并为根目录中的 `.csproj` 补充 `android/**`、`flutter/**`、`godot/**` 编译排除项，同时补充 Git 忽略规则。
+
+需要指定版本或工程路径时：
+
+```bash
+python3 flutter_config/init_project.py --branch 4.7.2-stable
+python3 flutter_config/init_project.py --project /path/to/godot_flutter_example
+```
+
+已有完整的 `godot/` 源码时会跳过克隆，`--branch` 不会切换已有源码版本。重新生成 `.csproj` 后可以再次执行，已有排除项不会重复添加。该初始化器要求存在 `.csproj`；纯 GDScript 工程不能直接使用此初始化步骤，需自行准备匹配版本的引擎源码。
+
+### 3. 配置游戏导出预设与平台工具
+
+在 Godot 编辑器中打开游戏，创建所需平台的导出预设并保存 `export_presets.cfg`：
+
+| 目标 | 默认预设名 | 构建前准备 |
+| --- | --- | --- |
+| Android | `Android` | 安装 Android 导出模板、SDK、源码要求版本的 NDK、Java 17 和 SCons；在编辑器中配置 Android SDK/JDK 路径 |
+| iOS | `iOS` | macOS、完整 Xcode、SCons 和 CocoaPods；C# 游戏还需匹配的 .NET iOS NativeAOT 支持 |
+
+Android 构建前还需按 [Android 配置说明](flutter_config/godot_android/README.md) 准备 `godot/thirdparty/swappy-frame-pacing` 中的架构库，构建脚本会检查缺失项。
+
+若 Android 构建脚本无法找到编辑器，可指定实际的可执行文件路径：
+
+```bash
+export GODOT_BIN=/Applications/Godot_mono.app/Contents/MacOS/Godot
+```
+
+iOS 统一入口通过 `--godot /path/to/Godot` 指定其他编辑器。编辑器、导出模板、源码与 C# SDK 版本应保持匹配。
+
+### 4. 构建 Android 产物并交给 Flutter
+
+在游戏根目录执行：
+
+```bash
+cd /path/to/godot_flutter_example
+python3 flutter_config/godot_android/buildScript/run_android_build.py
+```
+
+默认先使用 `apk-debug` 导出准备游戏资源和 .NET 依赖，再通过集成的 Gradle/SCons 模块编译引擎并打包 **debug、release 两套 AAR**。前置步骤会生成 Debug APK，但接入 Flutter 使用的是以下 AAR 目录：
+
+```text
+/path/to/godot_flutter_example/android/out/
+├── debug/
+│   ├── godot_game_lib/
+│   └── godot_lib/
+└── release/
+    ├── godot_game_lib/
+    └── godot_lib/
+```
+
+若希望构建后直接输出到 Flutter 插件的产物目录，可改用：
+
+```bash
+cd /path/to/godot_flutter_example
+python3 flutter_config/godot_android/buildScript/run_android_build.py \
+  --out-dir /path/to/flutter_godot/android/godot
+```
+
+也可以将默认输出中的 `debug`、`release` 目录复制到插件的 `android/godot/` 下。每个模块目录仅保留一份对应 AAR，避免旧游戏产物与新产物混用。随后完成下方的 [Android 接入](#android-接入)，在插件示例目录运行：
+
+```bash
+cd /path/to/flutter_godot/example
+flutter pub get
+flutter run -d <android-device-id>
+```
+
+默认资源准备不要求 Release APK 发布签名；显式选择 `--export-mode apk-release` 或 `both` 时需配置签名。`--variant debug` 可只更新调试产物，但当前宿主 settings 会注册四个模块，因此首次接入应先准备完整的 debug/release 目录和 AAR。
+
+### 5. 构建 iOS 产物并交给 Flutter
+
+在游戏根目录执行：
+
+```bash
+cd /path/to/godot_flutter_example
+python3 flutter_config/godot_ios/buildScript/run_ios_build.py --variant debug --jobs 6
+```
+
+脚本导出游戏资源，并编译、打包真机 arm64 与模拟器 arm64 引擎。C# 工程默认自动选择 mono，处理 NativeAOT 框架及相关数据。产物写入游戏的 `ios/out/debug/`；不传 `--variant` 时默认构建 debug/release 两套。
+
+构建完成后，切到插件根目录同步产物，再安装 Pods：
+
+```bash
+cd /path/to/flutter_godot
+python3 ios/sync_godot.py /path/to/godot_flutter_example/ios/out --variant debug
+cd example
+flutter pub get
+cd ios
+GODOT_VARIANT=debug pod install
+cd ..
+flutter run -d <ios-device-id>
+```
+
+首次接入需先完成下方的 [iOS 接入](#ios-接入) 配置；仓库中的 `example` 已包含对应配置。游戏资源导出不需要 IPA 签名，Flutter 真机运行仍需配置开发团队和签名。发布时构建、同步 release 产物，并使用 `GODOT_VARIANT=release pod install`。
+
+### 6. 后续更新与常用参数
+
+| 场景 | 操作 |
+| --- | --- |
+| Android 资源已导出，只重新编译打包 | Android 统一入口添加 `--skip-export` |
+| iOS 只更新游戏资源，复用已有引擎 | iOS 统一入口添加 `--skip-engine`，然后重新同步并安装 Pods |
+| iOS 只重新编译引擎，复用已有资源 | iOS 统一入口添加 `--skip-export` |
+| iOS 预览构建命令 | 添加 `--dry-run`，不执行编译或写入产物 |
+| 修改自定义原生模块或引擎源码 | 重新编译对应引擎，并更新 Flutter 插件中的产物 |
+| 修改场景、C# 脚本或游戏资源 | 重新导出、打包并更新产物；Flutter 热重载不会更新 AAR/PCK |
+
+首次引擎编译耗时较长，后续构建可复用 SCons 缓存。所有入口支持 `--help` 查看参数；初始化、平台环境及独立构建步骤详见 [flutter_config 总说明](flutter_config/README.md)、[Android 说明](flutter_config/godot_android/README.md) 和 [iOS 说明](flutter_config/godot_ios/README.md)。
+
+## 快速开始
+
+### 1. 添加依赖
 
 ```yaml
 dependencies:
   flutter_godot:
-    path: ../flutter_godot
+    path: /path/to/flutter_godot
 ```
 
-在宿主 `android/settings.gradle.kts` 中加入下面的模块声明。路径相对于宿主的 `android/` 目录，请按实际目录调整；本仓库的 example 已配置完成。
+### 2. 准备原生产物
+
+先按上方 [flutter_config 使用教程](#flutter_config-使用教程) 构建游戏和引擎产物，再按 [Android 接入](#android-接入) 或 [iOS 接入](#ios-接入) 配置宿主。仓库内的 `example` 已包含宿主配置，但仍需准备本地 Godot 产物。
+
+### 3. 在 Flutter 页面显示游戏
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:flutter_godot/flutter_godot.dart';
+
+class GamePage extends StatefulWidget {
+  const GamePage({super.key});
+
+  @override
+  State<GamePage> createState() => _GamePageState();
+}
+
+class _GamePageState extends State<GamePage> {
+  GodotController? _controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.yellow,
+      body: GodotView(
+        gameWidth: 1080,
+        gameHeight: 1920,
+        placeholderWidget: const Center(child: CircularProgressIndicator()),
+        errorWidget: const Center(child: Text('Godot 初始化失败')),
+        initCallback: (controller) {
+          setState(() => _controller = controller);
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _controller == null
+            ? null
+            : () async {
+                await _controller!.sendPlatformEventMsg(
+                  msg: '{"type":"ToScene","data":{"sceneName":"page_a"}}',
+                );
+              },
+        child: const Icon(Icons.play_arrow),
+      ),
+    );
+  }
+}
+```
+
+`GodotView` 需要有限的宽高约束；放在 `Column` 中时使用 `Expanded` 或 `SizedBox`。`initCallback` 表示 Android 纹理注册成功或 iOS 原生控制器已挂载，不表示游戏首帧或场景消息接收器已就绪。
+
+### 4. 运行示例
+
+```bash
+cd example
+flutter pub get
+flutter devices
+flutter run -d <device-id>
+```
+
+## Android 接入
+
+### 产物目录
+
+将游戏和引擎 AAR 按构建类型放入插件目录：
+
+```text
+android/
+├── godot_aar.gradle
+└── godot/
+    ├── debug/
+    │   ├── godot_game_lib/game_lib-mono-debug.aar
+    │   └── godot_lib/godot-lib.template_debug.aar
+    └── release/
+        ├── godot_game_lib/game_lib-mono-release.aar
+        └── godot_lib/godot-lib.template_release.aar
+```
+
+Debug 与 Release 分别使用配套的游戏和引擎 AAR。四个模块共用 [godot_aar.gradle](android/godot_aar.gradle)，产物目录中无需 `build.gradle`；每个模块目录应仅有一个 AAR。旁边的原始 `.so`、`.a` 等构建文件不会被单独打包。
+
+游戏资源通过 AAR 的 Android assets 合并，无需在 Flutter `pubspec.yaml` 再次声明。重新导出游戏或编译引擎后，更新对应目录的 AAR。
+
+### 宿主 Gradle 配置
+
+在宿主 `android/settings.gradle.kts` 中添加以下配置，将 `godotRoot` 替换为实际的插件产物目录：
 
 ```kotlin
-val godotRoot = file("../../flutter_godot/android/godot")
+val godotRoot = file("/path/to/flutter_godot/android/godot")
 include(":godot_game_lib_debug", ":godot_game_lib_release", ":godot_lib_debug", ":godot_lib_release")
 project(":godot_game_lib_debug").projectDir = File(godotRoot, "debug/godot_game_lib")
 project(":godot_game_lib_release").projectDir = File(godotRoot, "release/godot_game_lib")
@@ -57,9 +302,9 @@ listOf(":godot_game_lib_debug", ":godot_game_lib_release", ":godot_lib_debug", "
 }
 ```
 
-`buildFileName` 相对于各模块的 `projectDir`，上述布局下均指向插件的 `android/godot_aar.gradle`。
+`buildFileName` 相对于各模块的 `projectDir`，上述布局下均指向插件的 `android/godot_aar.gradle`。完整示例见 [settings.gradle.kts](example/android/settings.gradle.kts)。
 
-宿主 `android/app/build.gradle.kts` 的 `android` 中配置：
+在宿主 `android/app/build.gradle.kts` 的 `android` 中配置：
 
 ```kotlin
 android {
@@ -72,23 +317,19 @@ android {
 }
 ```
 
-保留 `.godot` 等导出资源，否则可能出现资源加载失败或黑屏。插件依据 debug/release 构建类型选择游戏及引擎 AAR；自定义构建类型需配置对应的 `matchingFallbacks`。
+该资源规则用于保留 `.godot` 等隐藏导出资源。自定义 Android 构建类型需配置对应的 `matchingFallbacks`。
 
-## 接入 iOS：在插件 Podspec 引入 Godot
+## iOS 接入
 
-引擎、游戏源码、PCK、C# AOT 动态框架和 ICU 数据统一由
-[ios/flutter_godot.podspec](ios/flutter_godot.podspec) 声明。宿主 Podfile 只需要 Flutter 默认的
-`flutter_install_all_ios_pods`，无需额外声明 GodotEngine / GodotGame，也无需登记 Flutter assets 或手动拖入 Xcode。
+### 同步游戏产物
 
-CocoaPods 文件路径相对于插件目录，因此先将游戏的 `ios/out` 同步到插件的 `ios/godot`：
+先按 [iOS 构建说明](flutter_config/godot_ios/README.md) 生成游戏工程的 `ios/out`，再在插件根目录执行：
 
-```sh
-# 在 flutter_godot 插件根目录执行
-python3 ios/sync_godot.py \
-  /Users/shiki/Workspace/workspace_godot/mydemo/godot_flutter_example/ios/out
+```bash
+python3 ios/sync_godot.py /path/to/godot_flutter_example/ios/out
 ```
 
-默认同步 debug，产物目录如下；`ios/godot` 为生成目录，已加入 Git 忽略规则。
+默认同步 debug，`--variant release` 或 `--variant both` 可选择其他产物：
 
 ```text
 ios/godot/debug/
@@ -96,108 +337,77 @@ ios/godot/debug/
 └── godot_game_lib/     # Sources、Resources、Frameworks、BundleFiles
 ```
 
-同步脚本只复制产物，不修改 Godot 源项目。需要完整本地目录，目录符号链接不会被 CocoaPods 的源码扫描器递归展开。
-重新导出游戏或编译引擎后，重新执行同步脚本，再运行 `pod install`。
+[sync_godot.py](ios/sync_godot.py) 只复制产物，不修改 Godot 源项目。同步目标是插件内的实际目录；不要用目录符号链接代替，CocoaPods 的源码扫描器不会递归展开这些链接。
 
-Podspec 中的关键配置：
+### 配置 CocoaPods
+
+[iOS Podspec](ios/flutter_godot.podspec) 统一声明引擎、游戏源码、PCK、C# AOT 框架和 ICU 数据。宿主无需另加 GodotEngine / GodotGame Pod，也无需登记 Flutter assets 或手动拖入 Xcode。
+
+宿主需关闭 SwiftPM，并在应用的 `pubspec.yaml` 中配置：
+
+```yaml
+flutter:
+  config:
+    enable-swift-package-manager: false
+```
+
+在 Flutter 默认 Podfile 的基础上设置最低 iOS 15，并在 Runner target 中使用静态 framework：
 
 ```ruby
-godot_variant = ENV.fetch('GODOT_VARIANT', 'debug')
-godot_root = "godot/#{godot_variant}"
-# 在 Pod::Spec.new 中
-s.source_files = 'flutter_godot/Sources/flutter_godot/**/*.swift',
-                 "#{godot_root}/godot_game_lib/Sources/*.{h,mm}"
-s.vendored_frameworks = "#{godot_root}/godot_lib/GodotEngine.xcframework",
-                        "#{godot_root}/godot_game_lib/Frameworks/*.xcframework"
+platform :ios, '15.0'
+
+target 'Runner' do
+  use_frameworks! :linkage => :static
+  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+end
 ```
 
-当前 iOS 使用 CocoaPods，最低 iOS 15。example 的 `pubspec.yaml` 已关闭此应用的 SwiftPM，
-并使用 `use_frameworks! :linkage => :static`。在其他 Flutter 宿主复用时也需要启用 CocoaPods。
-示例的 `Flutter/Debug.xcconfig` 和 `Release.xcconfig` 在 `Generated.xcconfig` 后包含 Pods 配置，
-使 Podspec 自动计算的模拟器架构配置生效。当前引擎支持 arm64 真机和 arm64 模拟器；
-Intel 模拟器需要先构建包含 x86_64 的引擎产物。
+保留 Flutter 默认的其他 Podfile 配置，完整示例见 [Podfile](example/ios/Podfile)。示例的 Debug/Release xcconfig 在 `Generated.xcconfig` 后包含 Pods 配置，以应用 Podspec 的模拟器架构设置。当前产物支持 arm64 真机和 arm64 模拟器；Intel 模拟器需另行构建 x86_64 引擎。
 
-运行 example：
+在插件根目录运行：
 
-```sh
+```bash
+cd example
 flutter pub get
-cd example/ios
+cd ios
 pod install
 open Runner.xcworkspace
-# 或回到 example 目录执行 flutter run -d <设备ID>
 ```
 
-Release 需先生成 Godot 的 `ios/out/release`，再执行：
+也可以回到 `example` 目录通过 `flutter run -d <ios-device-id>` 启动。真机运行需要配置开发团队与签名。
 
-```sh
-# 插件根目录
-python3 ios/sync_godot.py /path/to/game/ios/out --variant release
+### Release 与产物更新
+
+在插件根目录执行：
+
+```bash
+python3 ios/sync_godot.py /path/to/godot_flutter_example/ios/out --variant release
 cd example/ios
 GODOT_VARIANT=release pod install
 cd ..
 GODOT_VARIANT=release flutter build ios --release --no-codesign
 ```
 
-`--variant both` 可同步 debug 和 release；Podspec 的 `GODOT_VARIANT` 选择是 **Pod 安装时选择**，
-不是 Xcode 自动切换。默认 debug，切换或更新产物后需重新安装 Pods。
+`--no-codesign` 仅构建未签名产物，不能直接安装到真机。`GODOT_VARIANT` 在 **Pod 安装时**选择游戏和引擎，不会随 Xcode Debug/Release 配置自动切换。默认 debug；切换变体或更新产物后，应重新同步并运行 `pod install`。切回调试时使用 `GODOT_VARIANT=debug pod install`。
 
-Flutter 中继续使用同一个 `GodotView` 和 `GodotController.sendPlatformEventMsg`。
-iOS 通过原生触摸接收点击/拖动，`sendTap` 只适用于 Android；iOS 画面尺寸随 UIView 布局变化，
-由 Godot 的 viewport/stretch 配置处理。控制器的 `textureId` 在 iOS 仅作内部会话标识，不能交给 `Texture`。
-iOS 需要通过 `GodotView` 创建原生视图，直接调用控制器 `init` 不会创建视图。
+## API 与消息
 
-初始化回调表示原生控制器已挂载；场景信号尚未连接时发送消息会返回 false，调用方可稍后重试。
-宿主背景色通过 `Scaffold.backgroundColor` 设置；游戏需开启透明 viewport，原生库需设置非 opaque 渲染层。
-当前游戏已配置透明背景。原生库处理前后台暂停/恢复，插件在卸载时暂停并解除控制器挂载。
-Godot → Flutter 回调尚未接入 Dart 公共 API。
+统一入口为 `package:flutter_godot/flutter_godot.dart`。
 
-参考：[CocoaPods Podspec 文件声明](https://guides.cocoapods.org/syntax/podspec.html)、
-[Flutter iOS 原生视图](https://docs.flutter.dev/platform-integration/ios/platform-views)。
+| 接口 | 说明 |
+| --- | --- |
+| `GodotView` | 显示游戏，自动管理视图卸载时的释放或解除挂载 |
+| `GodotController.sendPlatformEventMsg(msg: ...)` | 向游戏发送字符串，返回是否接受发送 |
+| `GodotController.sendTap(x: ..., y: ...)` | 仅 Android；参数为游戏坐标，iOS 使用原生触摸 |
+| `GodotController.dispose()` | 手动管理控制器时释放会话资源 |
+| `GodotController.state` / `GodotState` | 查询初始化状态 |
+| `FlutterGodot().getPlatformVersion()` | 查询平台版本 |
 
-## Flutter 使用
+Android 将组件内点击坐标映射至 `gameWidth × gameHeight`，当前按拉伸铺满处理。iOS 尺寸随原生 UIView 布局变化，由 Godot viewport/stretch 配置处理；`textureId` 在 iOS 只是内部会话标识，不能传给 Flutter `Texture`。iOS 必须通过 `GodotView` 创建原生视图，单独调用控制器 `init()` 不会创建视图。
 
-统一导入入口为 `lib/flutter_godot.dart`，导出 `GodotView`、`GodotController` 和 `GodotState`：
+### Flutter → Godot
 
-```dart
-import 'package:flutter/material.dart';
-import 'package:flutter_godot/flutter_godot.dart';
-
-class GamePage extends StatelessWidget {
-  const GamePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: GodotView(
-        gameWidth: 1080,
-        gameHeight: 1920,
-        placeholderWidget: const Center(child: CircularProgressIndicator()),
-        errorWidget: const Center(child: Text('Godot 初始化失败')),
-        initCallback: (controller) {
-          // 控制器可在此保存，供按钮发送消息。
-        },
-      ),
-    );
-  }
-}
-```
-
-`GodotView` 需要有限的宽高约束；放在 `Column` 中时使用 `Expanded` 或 `SizedBox`。画面按组件区域拉伸，点击坐标按实际组件尺寸映射至 `gameWidth × gameHeight`。Android 当前仅转发单次点击（DOWN/UP），未实现拖动、多点触控或键盘输入；iOS 使用原生视图直接接收触摸。
-
-`initCallback` 在纹理注册成功后调用，比源项目在初始化前回调更晚；它不表示 Godot 已渲染首帧。Dart 初始化异常会显示 `errorWidget`，渲染线程中的引擎/EGL 错误需查看 Android 日志。
-
-```dart
-await controller.sendTap(x: 540, y: 960); // 游戏坐标
-await controller.sendPlatformEventMsg(
-  msg: '{"type":"ToScene","data":{"sceneName":"show_scene"}}',
-);
-```
-
-`GodotView` 在卸载时自动释放 Android 纹理或解除 iOS 原生视图挂载。Android 中自行调用 `GodotController.init()` 管理纹理的使用者，需要自行 `await controller.dispose()`。Android 渲染尺寸在创建时确定，不支持运行中修改。
-
-## Godot 消息约定
-
-Android 注册名为 `PlatformEvent` 的 Godot 插件，通过 `platform_event(String)` 信号向游戏发送消息。JSON 只是示例业务协议，插件不会解析 JSON，场景名和消息处理由游戏实现。例如在 GDScript 中：
+平台插件名称为 `PlatformEvent`，游戏通过 `platform_event(String)` 信号接收消息。例如 GDScript：
 
 ```gdscript
 func _ready():
@@ -209,26 +419,38 @@ func _on_platform_event(message: String):
     print(message)
 ```
 
-游戏调用 `PlatformEvent.onGodotEventMsg` 当前只写入 Android 日志，没有向 Dart 回调的公开接口。源项目中未接通的 Dart 回调映射没有作为可用功能暴露。
+Flutter 侧发送：
 
-## 渲染链路与迁移内容
-
-```text
-GodotView → GodotController → MethodChannel flutter_godot
-  → FlutterGodotPlugin → SurfaceProducer / Surface
-  → GodotRenderHandlerThread → Godot.initEngine
-  → EGL / GodotLib.step → Flutter Texture
+```dart
+final accepted = await controller.sendPlatformEventMsg(
+  msg: '{"type":"ToScene","data":{"sceneName":"page_a"}}',
+);
 ```
 
-- `lib/godot_*.dart`：视图、状态和控制器；`flutter_godot.dart` 保留 `FlutterGodot.getPlatformVersion()`。
-- `android/src/main/kotlin/me/shiki/flutter_godot/`：引擎宿主、渲染线程、EGL/FBO 工具、输入和消息插件。
-- `android/godot/`：本地引擎与游戏 AAR；`example/android/settings.gradle.kts` 提供模块配置样例。
-- 修复原实现初始化异常不回复 MethodChannel、无效参数处理和销毁时未停止绘制/释放 EGL 的问题。帧绘制使用 EGL window surface，避免仅绘制到未复制到窗口的离屏 FBO。
-- 未迁入源项目中未使用的 `Test.kt` 实验渲染器。现有 `flutter_config/` 保留，用于游戏工程初始化和 Android 构建，详见 [配置说明](flutter_config/README.md) 和 [Android 构建说明](flutter_config/godot_android/README.md)。
+JSON 是范例游戏的业务协议，插件不负责解析或加载场景；`page_a` 必须由游戏实际提供并处理。返回成功不表示场景已切换。iOS 在场景信号尚未连接时可能返回 `false`，调用方可在游戏就绪后重试。Godot → Flutter 消息尚未暴露为 Dart 公共回调 API。
 
-当前渲染器强制 `opengl3` / `gl_compatibility`，不支持 Vulkan。源项目的后台暂停、Surface 重建和配置变化恢复没有完整实现，当前也不能保证后台恢复稳定；生产接入前需在目标设备验证这些生命周期场景。
+## 透明背景与使用限制
 
-## 运行与验证
+宿主背景色通过 `Scaffold.backgroundColor` 设置。要透出黄色等宿主背景，Godot 游戏需开启透明 viewport，并避免用不透明的场景背景覆盖；原生渲染层也需保留 Alpha。游戏配置示例：
+
+```ini
+[rendering]
+viewport/transparent_background=true
+environment/defaults/default_clear_color=Color(0, 0, 0, 0)
+```
+
+修改游戏工程后需重新导出并更新原生产物，Flutter 热重载不会同步 AAR/PCK 内容。
+
+| 平台 | 当前限制 |
+| --- | --- |
+| Android | 单进程单 Godot 会话；销毁后需重启应用再创建。固定初始化渲染尺寸，强制 `opengl3` / `gl_compatibility`，不支持 Vulkan；仅转发单次点击，未实现拖动、多点触控或键盘输入 |
+| Android 生命周期 | 后台恢复、Surface 重建和配置变化的恢复链路尚不完整，需在目标设备验证 |
+| iOS | 同时只能展示一个 Godot 原生视图；卸载时暂停并解除控制器挂载，使用原生触摸；尚未提供 Flutter Texture 渲染 |
+| 其他平台 | 暂未实现 Web 和桌面平台 |
+
+## 验证与排错
+
+在插件根目录执行：
 
 ```bash
 flutter pub get
@@ -236,15 +458,17 @@ flutter analyze
 flutter test
 cd example
 flutter test
-flutter run -d <android-device-id>
-# 只构建 APK
 flutter build apk --debug
 ```
 
-Dart 测试覆盖通道参数、点击坐标缩放、错误展示、释放调用和原有版本查询。实际画面、C# 运行时加载、消息触发场景切换及生命周期恢复需使用匹配 ABI 的 Android 设备验证。示例的“切换场景”按钮依赖游戏处理 `ToScene` 协议及包含 `show_scene` 场景。
+构建与 Dart 测试不能替代目标设备上的游戏画面、场景消息、输入及生命周期验证。
 
-出现黑屏时，先检查 logcat 中 `GodotRenderHandler`、`EGLManager`、`godot` 的错误，再确认 AAR 版本、设备 ABI 和资源完整性。若 Gradle 提示找不到 `godot_game_lib_debug` 或 `godot_game_lib_release`，检查宿主 settings 中的模块路径。
-
-初次迁移验证（旧目录）：`flutter analyze` 无问题，插件 6 项测试与示例 1 项测试通过，`example` 的 `flutter build apk --debug` 成功。尚未进行 Android 真机画面与消息联调。
-
-新目录适配验证：示例 `flutter build apk --debug` 与 `flutter build apk --release` 均成功，分别使用对应构建类型的游戏和引擎模块。新 AAR 的真机渲染及退出流程尚未联调。
+| 现象 | 检查项 |
+| --- | --- |
+| Android 模块目录不存在 | 检查 `godotRoot` 和 `debug/godot_lib`、`release/godot_lib` 等路径，不应多一层 `godot/` |
+| Android 提示 `No variants exist` | 检查四个模块是否通过 `buildFileName` 使用 `android/godot_aar.gradle` |
+| AAR 缺失或重复 | 每个模块目录只放一个对应的 AAR；游戏与引擎版本需匹配 |
+| Android 黑屏或资源加载失败 | 查看 logcat 中的 `GodotRenderHandler`、`EGLManager`、`godot` 日志，检查设备 ABI 与隐藏资源是否完整 |
+| iOS 提示缺少 Godot 产物 | 先执行 `ios/sync_godot.py`，再运行 `pod install`；确认 `GODOT_VARIANT` 与同步目录一致 |
+| 黄色背景没有更新 | 完整停止并重新运行应用；如果修改的是 Godot 内容，还需重新导出游戏产物 |
+| iOS 启动白屏、VM Service 发现超时 | 检查设备解锁、USB 连接及应用日志；若同时提示 Device Support 符号缓存异常，按提示重新准备符号，完成后重启调试会话 |

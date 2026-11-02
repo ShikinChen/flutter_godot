@@ -1,5 +1,5 @@
-// Shared by the prebuilt Godot modules. Keep this outside the export directory
-// so replacing android/godot does not remove the consumable configuration.
+// Godot 预编译模块共用的配置，放在导出目录之外，
+// 避免替换 android/godot 时丢失可供依赖的模块配置。
 def aarFiles = fileTree(dir: projectDir, include: ['*.aar']).files
 if (aarFiles.size() != 1) {
     throw new GradleException("${project.path}: expected exactly one AAR in ${projectDir}, found ${aarFiles.size()}")
@@ -10,5 +10,5 @@ configurations.create('default') {
     canBeResolved = false
 }
 
-// Ignore adjacent raw native libraries; the AAR carries its packaged libraries.
+// 忽略旁边的原始原生库文件；所需库已包含在 AAR 中。
 artifacts.add('default', aarFiles.first())

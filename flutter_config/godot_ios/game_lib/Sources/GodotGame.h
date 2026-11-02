@@ -1,17 +1,17 @@
 #import <UIKit/UIKit.h>
 
 NS_ASSUME_NONNULL_BEGIN
-/// Native game messages. userInfo[@"json"] is the JSON string sent by Godot.
+/// 原生游戏消息；userInfo[@"json"] 为 Godot 发送的 JSON 字符串。
 FOUNDATION_EXPORT NSNotificationName const GodotGameEventNotification;
 
-/// All methods must be called on the main thread. One engine per process.
+/// 所有方法必须在主线程调用，每个进程仅使用一个引擎实例。
 @interface GodotGame : NSObject
 + (instancetype)shared;
-/// Creates the engine once. Retain/reuse this controller; restarting is unsupported.
+/// 仅创建一次引擎；需保留并复用此控制器，不支持重启引擎。
 - (nullable UIViewController *)startWithError:(NSError * _Nullable * _Nullable)error;
 - (void)pause;
 - (void)resume;
-/// Returns NO before the scene bridge is ready, or if json is invalid JSON.
+/// 场景桥接尚未就绪或 json 不是有效 JSON 时返回 NO。
 - (BOOL)sendPlatformEvent:(NSString *)json;
 @end
 NS_ASSUME_NONNULL_END

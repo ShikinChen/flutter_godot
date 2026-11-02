@@ -1,7 +1,7 @@
 require 'xcodeproj'
 
-# ios/godot is populated from the game's ios/out by sync_godot.py. All CocoaPods
-# file patterns stay relative to this plugin, including exported game sources.
+# sync_godot.py 将游戏的 ios/out 同步到 ios/godot。CocoaPods 中的
+# 所有文件模式均相对于本插件目录，包括导出的游戏源码。
 godot_variant = ENV.fetch('GODOT_VARIANT', 'debug')
 raise 'GODOT_VARIANT must be debug or release' unless %w[debug release].include?(godot_variant)
 godot_root = "godot/#{godot_variant}"

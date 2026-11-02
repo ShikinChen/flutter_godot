@@ -31,8 +31,8 @@ extern "C" bool FGSendPlatformEvent(const char *json) {
 
 void initialize_ios_game_bridge_module(ModuleInitializationLevel level) {
     if (level != MODULE_INITIALIZATION_LEVEL_SCENE) return;
-    // The shipped GodotSharp assembly has no generated IOSGameBridge wrapper.
-    // Internal registration lets C# use its known Object base via GetSingleton.
+    // 随包提供的 GodotSharp 程序集中没有生成 IOSGameBridge 包装类；
+    // 通过内部注册，C# 可经 GetSingleton 使用已知的 Object 基类。
     GDREGISTER_INTERNAL_CLASS(IOSGameBridge);
     bridge = memnew(IOSGameBridge);
     Engine::get_singleton()->add_singleton(Engine::Singleton("PlatformEvent", bridge));

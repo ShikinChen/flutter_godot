@@ -1,4 +1,4 @@
-"""Contract tests for command generation and artifact packaging; no Xcode needed."""
+"""验证命令生成与产物打包约定的测试，无需 Xcode。"""
 import contextlib
 import importlib
 import io

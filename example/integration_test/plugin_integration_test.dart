@@ -1,9 +1,9 @@
-// This is a basic Flutter integration test.
+// Flutter 基础集成测试。
 //
-// Since integration tests run in a full Flutter application, they can interact
-// with the host side of a plugin implementation, unlike Dart unit tests.
+// 集成测试运行于完整的 Flutter 应用中，
+// 因此可以调用插件宿主端实现；Dart 单元测试不具备此能力。
 //
-// For more information about Flutter integration tests, please see
+// Flutter 集成测试说明参见：
 // https://flutter.dev/to/integration-testing
 
 import 'package:flutter_test/flutter_test.dart';
@@ -21,8 +21,8 @@ void main() {
   testWidgets('getPlatformVersion test', (WidgetTester tester) async {
     final FlutterGodot plugin = FlutterGodot();
     final String? version = await plugin.getPlatformVersion();
-    // The version string depends on the host platform running the test, so
-    // just assert that some non-empty string is returned.
+    // 版本字符串取决于运行测试的宿主平台，
+    // 因此这里只验证返回值不是空字符串。
     expect(version?.isNotEmpty, true);
   });
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Copy Godot iOS output into the plugin for flutter_godot.podspec to consume."""
+"""将 Godot iOS 产物复制到插件内，供 flutter_godot.podspec 使用。"""
 import argparse
 import os
 from pathlib import Path
@@ -19,14 +19,14 @@ def main():
     if source == destination.absolute() or destination.absolute() in source.parents:
         parser.error('Source must be outside the plugin output directory')
     variants = ('debug', 'release') if args.variant == 'both' else (args.variant,)
-    # Validate every selected variant before changing any local output.
+    # 修改本地产物前，先验证所有选定构建类型的源文件。
     for variant in variants:
         for relative in ('godot_lib/GodotEngine.xcframework/Info.plist',
                          'godot_game_lib/Sources/GodotGame.h',
                          'godot_game_lib/Resources/game.pck'):
             if not (source / variant / relative).is_file():
                 parser.error(f'Missing Godot artifact: {source / variant / relative}')
-    # Remove only a legacy directory link, never its external target.
+    # 仅移除旧版目录符号链接，不删除链接指向的外部目录。
     if destination.is_symlink():
         destination.unlink()
     destination.mkdir(parents=True, exist_ok=True)

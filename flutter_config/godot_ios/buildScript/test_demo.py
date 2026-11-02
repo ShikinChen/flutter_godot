@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install local Pods and build demo without requiring signing."""
+"""安装本地 Pods 并构建示例，无需应用签名。"""
 import argparse
 import os
 import platform

@@ -8,6 +8,6 @@
 /captures
 .cxx
 
-# Godot exports: keep Gradle wrappers, ignore AARs and native build outputs.
-# Layout: godot/{debug,release}/{godot_game_lib,godot_lib}/
+# Godot 导出产物：保留 Gradle 包装配置，忽略 AAR 和原生构建产物。
+# 目录结构：godot/{debug,release}/{godot_game_lib,godot_lib}/
 /godot

@@ -18,9 +18,9 @@ import org.godotengine.godot.game.lib.AndroidEventPlugin
 import org.godotengine.godot.plugin.GodotPlugin
 
 /***
- * CreateBy: shiki
- * CreateDate: 2025-10-27
- * Description: [文件描述说明]
+ * 作者： shiki
+ * 创建日期： 2025-10-27
+ * 说明： [文件描述说明]
  ***/
 
 
@@ -84,7 +84,7 @@ class GodotApp : GodotActivity() {
 
     companion object {
         init {
-            // .NET libraries.
+            // .NET 运行时库。
             if (BuildConfig.FLAVOR == "mono") {
                 try {
                     Log.v("GODOT", "Loading System.Security.Cryptography.Native.Android library")

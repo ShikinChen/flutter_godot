@@ -10,9 +10,9 @@ import android.view.Surface
 import android.util.Log
 
 /***
- * CreateBy: shiki
- * CreateDate: 2025-10-23
- * Description: [文件描述说明]
+ * 作者： shiki
+ * 创建日期： 2025-10-23
+ * 说明： [文件描述说明]
  ***/
 class EGLManager(private val surface: Surface) {
     private var eglDisplay: EGLDisplay = EGL14.EGL_NO_DISPLAY

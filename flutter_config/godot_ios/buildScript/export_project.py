@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Export an iOS-feature PCK, without requiring a signing team or IPA export."""
+"""导出包含 iOS 平台特性的 PCK，无需配置签名团队或导出 IPA。"""
 import shutil
 import plistlib
 from pathlib import Path
@@ -7,7 +7,7 @@ from common import INTEGRATION, edition, main_guard, output_root, parser, projec
 
 
 def package_aot(root, package, variant):
-    """Convert the .NET export's dylib slices to embeddable iOS frameworks."""
+    """将 .NET 导出的 dylib 切片转换为可嵌入的 iOS 框架。"""
     config = "ExportDebug" if variant == "debug" else "ExportRelease"
     candidates = list((root / ".godot/mono/temp/bin" / config).glob("*_aot.xcframework"))
     if len(candidates) != 1:
@@ -41,7 +41,7 @@ def package_aot(root, package, variant):
         shutil.rmtree(dest)
     run([*command, "-output", dest])
     shutil.rmtree(work)
-    # .NET's ICU data is looked up in the application bundle, outside the PCK.
+    # .NET 在应用包中查找 ICU 数据，而不是在 PCK 内部查找。
     data = root / ".godot/mono/temp/bin/godot-publish-dotnet" / f"{config}-ios-arm64"
     dat_files = list(data.glob("*.dat"))
     for path in dat_files:
@@ -56,8 +56,8 @@ def main():
     cli.add_argument("--preset", default="iOS", help="export_presets.cfg 中的 iOS 预设名")
     args = cli.parse_args()
     root = project_root(args.project)
-    # This integration deliberately builds the standard engine. Silently exporting
-    # C# scripts would produce a runnable app with broken game logic.
+    # 此集成明确构建标准版引擎；若仍悄悄导出 C# 脚本，
+    # 会导致应用虽然能运行，游戏逻辑却无法执行。
     scripts = [p for p in root.rglob("*.cs")
                if not set(p.relative_to(root).parts).intersection({"godot", "android", "ios", "flutter_config", ".godot", "bin", "obj"})]
     referenced = []
@@ -78,11 +78,11 @@ def main():
         resources = package / "Resources"
         if not args.dry_run:
             resources.mkdir(parents=True, exist_ok=True)
-            # A failed export must never be mistaken for a previous successful PCK.
+            # 导出失败时，不得将上一次成功生成的 PCK 误认为本次产物。
             (resources / "game.pck").unlink(missing_ok=True)
         command = [args.godot, "--headless", "--path", root]
-        # Main::start supports combining these switches: debug selects script
-        # debug data, pack selects resource-only export (no signed app).
+        # Main::start 支持组合这些参数：debug 选择脚本调试数据，
+        # pack 选择仅导出资源包，不生成签名应用。
         if variant == "debug":
             command += ["--export-debug", args.preset]
         command += ["--export-pack", args.preset, resources / "game.pck"]

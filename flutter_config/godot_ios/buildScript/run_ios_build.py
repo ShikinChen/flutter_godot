@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Unified entry, intentionally forwards unknown options as errors."""
+"""统一构建入口，明确将未知参数作为错误处理。"""
 import sys
 from pathlib import Path
 from common import main_guard, parser, run

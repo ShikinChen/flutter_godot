@@ -6,11 +6,11 @@ import org.mockito.Mockito
 import kotlin.test.Test
 
 /*
- * This demonstrates a simple unit test of the Kotlin portion of this plugin's implementation.
+ * 此测试用于验证插件 Kotlin 实现的基本行为。
  *
- * Once you have built the plugin's example app, you can run these tests from the command
- * line by running `./gradlew testDebugUnitTest` in the `example/android/` directory, or
- * you can run them directly from IDEs that support JUnit such as Android Studio.
+ * 构建插件示例后，可在 example/android/ 目录执行
+ * ./gradlew testDebugUnitTest，
+ * 也可在 Android Studio 等支持 JUnit 的开发工具中直接运行。
  */
 
 internal class FlutterGodotPluginTest {

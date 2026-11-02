@@ -1,4 +1,4 @@
-// Gradle build config for Godot Engine's Android port.
+// Godot 引擎 Android 平台的 Gradle 构建配置。
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
@@ -23,9 +23,9 @@ ext {
 }
 
 configurations {
-    // Initializes a placeholder for the devImplementation dependency configuration.
+    // 为 devImplementation 依赖配置创建占位项。
     devImplementation {}
-    // Initializes a placeholder for the monoImplementation dependency configuration.
+    // 为 monoImplementation 依赖配置创建占位项。
     monoImplementation {}
 }
 
@@ -61,7 +61,7 @@ android {
     namespace = 'com.godot.game'
 
     defaultConfig {
-        // The default ignore pattern for the 'assets' directory includes hidden files and directories which are used by Godot projects.
+        // assets 目录的默认忽略规则会排除 Godot 使用的隐藏文件和目录，此处调整规则以保留它们。
         aaptOptions {
             ignoreAssetsPattern "!.svn:!.git:!.gitignore:!.ds_store:!*.scc:<dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"
         }
@@ -72,7 +72,7 @@ android {
             abiFilters export_abi_list
         }
 
-        // Feel free to modify the application id to your own.
+        // 请按需修改为自己的应用 ID。
         applicationId getExportPackageName()
         versionCode getExportVersionCode()
         versionName getExportVersionName()
@@ -93,7 +93,7 @@ android {
         exclude 'META-INF/LICENSE'
         exclude 'META-INF/NOTICE'
 
-        // Debug symbols are kept for development within Android Studio.
+        // 保留调试符号，供 Android Studio 开发调试使用。
         if (shouldNotStrip()) {
             jniLibs {
                 keepDebugSymbols += '**/*.so'
@@ -101,14 +101,14 @@ android {
         }
 
         jniLibs {
-            // Setting this to true causes AGP to package compressed native libraries when building the app
-            // For more background, see:
+            // 设置为 true 时，AGP 会在构建应用时压缩打包原生库。
+            // 背景说明参见：
             // - https://developer.android.com/build/releases/past-releases/agp-3-6-0-release-notes#extractNativeLibs
             // - https://stackoverflow.com/a/44704840
             useLegacyPackaging shouldUseLegacyPackaging()
         }
 
-        // Always select Godot's version of libc++_shared.so in case deps have their own
+        // 依赖中也包含 libc++_shared.so 时，统一选用 Godot 的版本。
         pickFirst 'lib/x86/libc++_shared.so'
         pickFirst 'lib/x86_64/libc++_shared.so'
         pickFirst 'lib/armeabi-v7a/libc++_shared.so'
@@ -143,8 +143,8 @@ android {
     buildTypes {
 
         debug {
-            // Signing and zip-aligning are skipped for prebuilt builds, but
-            // performed for Godot gradle builds.
+            // 预编译构建跳过签名和 ZIP 对齐；
+            // Godot Gradle 构建则执行这些步骤。
             zipAlignEnabled shouldZipAlign()
             if (shouldSign()) {
                 signingConfig signingConfigs.debug
@@ -159,8 +159,8 @@ android {
 
         dev {
             initWith debug
-            // Signing and zip-aligning are skipped for prebuilt builds, but
-            // performed for Godot gradle builds.
+            // 预编译构建跳过签名和 ZIP 对齐；
+            // Godot Gradle 构建则执行这些步骤。
             zipAlignEnabled shouldZipAlign()
             if (shouldSign()) {
                 signingConfig signingConfigs.debug
@@ -174,8 +174,8 @@ android {
         }
 
         release {
-            // Signing and zip-aligning are skipped for prebuilt builds, but
-            // performed for Godot gradle builds.
+            // 预编译构建跳过签名和 ZIP 对齐；
+            // Godot Gradle 构建则执行这些步骤。
             zipAlignEnabled shouldZipAlign()
             if (shouldSign()) {
                 signingConfig signingConfigs.release

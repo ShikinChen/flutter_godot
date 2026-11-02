@@ -1,4 +1,4 @@
-// Standalone entry point for the demo, sharing the Godot export configuration.
+// 示例的独立构建入口，与 Godot 导出共用配置。
 pluginManagement {
     apply from: '../../../android/build/config.gradle'
 

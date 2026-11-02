@@ -25,7 +25,7 @@ plugins {
 
 include(":app")
 
-// Per-variant Godot game and engine AAR modules.
+// 按构建类型配置 Godot 游戏和引擎 AAR 模块。
 val godotRoot = file("../../android/godot")
 include(":godot_game_lib_debug", ":godot_game_lib_release", ":godot_lib_debug", ":godot_lib_release")
 project(":godot_game_lib_debug").projectDir = File(godotRoot, "debug/godot_game_lib")
@@ -33,7 +33,7 @@ project(":godot_game_lib_release").projectDir = File(godotRoot, "release/godot_g
 project(":godot_lib_debug").projectDir = File(godotRoot, "debug/godot_lib")
 project(":godot_lib_release").projectDir = File(godotRoot, "release/godot_lib")
 
-// Use the shared wrapper even when exported directories have no build.gradle.
+// 统一使用共享包装配置，导出目录无需包含 build.gradle。
 listOf(":godot_game_lib_debug", ":godot_game_lib_release", ":godot_lib_debug", ":godot_lib_release").forEach {
     project(it).buildFileName = "../../../godot_aar.gradle"
 }

@@ -5,9 +5,9 @@ import android.os.Looper
 import android.view.Surface
 
 /***
- * CreateBy: shiki
- * CreateDate: 2025-10-15
- * Description: [文件描述说明]
+ * 作者： shiki
+ * 创建日期： 2025-10-15
+ * 说明： [文件描述说明]
  ***/
 
 

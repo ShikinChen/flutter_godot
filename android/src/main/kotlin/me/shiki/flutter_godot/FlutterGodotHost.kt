@@ -10,9 +10,9 @@ import org.godotengine.godot.GodotHost
 import org.godotengine.godot.input.GodotInputHandler
 
 /***
- * CreateBy: shiki
- * CreateDate: 2025-10-20
- * Description: [文件描述说明]
+ * 作者： shiki
+ * 创建日期： 2025-10-20
+ * 说明： [文件描述说明]
  ***/
 
 

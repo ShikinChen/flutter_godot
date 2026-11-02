@@ -1,32 +1,26 @@
 name: flutter_godot_example
 description: "Demonstrates how to use the flutter_godot plugin."
-# The following line prevents the package from being accidentally published to
-# pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+# 禁止通过 flutter pub publish 意外发布到 pub.dev，适用于私有包。
+publish_to: 'none' # 需要发布到 pub.dev 时移除此配置
 
 environment:
   sdk: ^3.13.7
 
-# Dependencies specify other packages that your package needs in order to work.
-# To automatically upgrade your package dependencies to the latest versions
-# consider running `flutter pub upgrade --major-versions`. Alternatively,
-# dependencies can be manually updated by changing the version numbers below to
-# the latest version available on pub.dev. To see which dependencies have newer
-# versions available, run `flutter pub outdated`.
+# 声明运行所需依赖。可执行 flutter pub upgrade --major-versions 升级依赖，
+# 也可手动修改下方版本号。执行 flutter pub outdated 查看可更新的依赖。
 dependencies:
   flutter:
     sdk: flutter
 
   flutter_godot:
-    # When depending on this package from a real application you should use:
+    # 在实际应用中可使用版本依赖，例如：
     #   flutter_godot: ^x.y.z
-    # See https://dart.dev/tools/pub/dependencies#version-constraints
-    # The example app is bundled with the plugin so we use a path dependency on
-    # the parent directory to use the current plugin's version.
+    # 版本约束说明参见 https://dart.dev/tools/pub/dependencies#version-constraints
+    # 此示例随插件提供，因此使用父目录的本地路径依赖，
+    # 以运行当前插件版本。
     path: ../
 
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
+  # 添加 Cupertino 图标字体，配合 CupertinoIcons 类显示 iOS 风格图标。
   cupertino_icons: ^1.0.8
 
 dev_dependencies:
@@ -35,42 +29,34 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
+  # flutter_lints 提供推荐的代码检查规则，
+  # 在项目根目录的 analysis_options.yaml 中启用。
+  # 可在该文件中禁用指定规则或启用其他规则。
   flutter_lints: ^6.0.0
 
-# For information on the generic Dart part of this file, see the
-# following page: https://dart.dev/tools/pub/pubspec
+# 本文件中 Dart 通用配置的说明参见 https://dart.dev/tools/pub/pubspec。
 
-# The following section is specific to Flutter packages.
+# 以下为 Flutter 包专用配置。
 flutter:
   config:
     enable-swift-package-manager: false
 
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
+  # 将 Material 图标字体打包到应用中，供 Icons 类使用。
   uses-material-design: true
 
-  # To add assets to your application, add an assets section, like this:
+  # 在应用中添加资源时，可按以下示例配置 assets：
   # assets:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 
-  # An image asset can refer to one or more resolution-specific "variants", see
+  # 图片资源可包含适配不同分辨率的变体，参见：
   # https://flutter.dev/to/resolution-aware-images
 
-  # For details regarding adding assets from package dependencies, see
+  # 引用依赖包资源的说明参见：
   # https://flutter.dev/to/asset-from-package
 
-  # To add custom fonts to your application, add a fonts section here,
-  # in this "flutter" section. Each entry in this list should have a
-  # "family" key with the font family name, and a "fonts" key with a
-  # list giving the asset and other descriptors for the font. For
-  # example:
+  # 添加自定义字体时，在 flutter 下配置 fonts。每项包含字体族名 family，
+  # 以及声明资源和字体属性的 fonts 列表。例如：
   # fonts:
   #   - family: Schyler
   #     fonts:
@@ -83,5 +69,4 @@ flutter:
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
   #
-  # For details regarding fonts from package dependencies,
-  # see https://flutter.dev/to/font-from-package
+  # 使用依赖包字体的说明参见 https://flutter.dev/to/font-from-package。

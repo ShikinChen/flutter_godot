@@ -91,7 +91,7 @@ def update_gitignore(path: Path, patterns: tuple[str, ...]) -> bool:
         text += newline
     if text:
         text += newline
-    text += "# Flutter Godot generated files and local configuration" + newline
+    text += "# Flutter Godot 生成文件及本地配置" + newline
     text += newline.join(missing) + newline
     encoding = "utf-8-sig" if raw.startswith(b"\xef\xbb\xbf") else "utf-8"
     path.write_bytes(text.encode(encoding))

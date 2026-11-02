@@ -14,3 +14,8 @@ __pycache__/
 *.so
 *.a
 *.dex
+/godot_ios/demo/Pods/
+/godot_ios/demo/build/
+/godot_ios/demo/*.xcworkspace/
+/godot_ios/demo/Podfile.lock
+xcuserdata/

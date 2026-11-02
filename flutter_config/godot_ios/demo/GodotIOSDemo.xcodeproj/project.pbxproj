@@ -1,0 +1,518 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		10C062F8FD6872344D82B33F /* libPods-GodotIOSDemo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EA0ACDDE71AF96F2FC540A0 /* libPods-GodotIOSDemo.a */; };
+		369B21F87641EB9A939BC550 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 985AB371847D9059CE052D6A /* Foundation.framework */; };
+		8A56D8FA70154B3376E4E2C1 /* DemoUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 318857B63F1038801E7C2D29 /* DemoUITests.m */; };
+		E0C7CC8DE68E750CDBFA7AD1 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = B3ECD62709CB7CFF66649711 /* main.m */; };
+		F7A3636C9A6F06FD3993B069 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 985AB371847D9059CE052D6A /* Foundation.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		6D33CC2352531992DD91B750 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1F4E07BC619EFD4748B4612B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C21DCE7BF93537851426A81D;
+			remoteInfo = GodotIOSDemo;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		1DE55DE400D7DD07ED20C295 /* GodotIOSDemoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GodotIOSDemoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		1EA0ACDDE71AF96F2FC540A0 /* libPods-GodotIOSDemo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-GodotIOSDemo.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		287292D8E2852DD82ABA9B00 /* Pods-GodotIOSDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GodotIOSDemo.release.xcconfig"; path = "Target Support Files/Pods-GodotIOSDemo/Pods-GodotIOSDemo.release.xcconfig"; sourceTree = "<group>"; };
+		318857B63F1038801E7C2D29 /* DemoUITests.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DemoUITests.m; path = UITests/DemoUITests.m; sourceTree = "<group>"; };
+		63596624A9C48EA49ACEA409 /* Pods-GodotIOSDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GodotIOSDemo.debug.xcconfig"; path = "Target Support Files/Pods-GodotIOSDemo/Pods-GodotIOSDemo.debug.xcconfig"; sourceTree = "<group>"; };
+		81DC825E851D796460E06690 /* GodotIOSDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GodotIOSDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		985AB371847D9059CE052D6A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		B3ECD62709CB7CFF66649711 /* main.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = main.m; path = Sources/main.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		6C8BCD6D3CD0FC9E7716C2A0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				369B21F87641EB9A939BC550 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FFB3DA72896147BFB3D108D2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F7A3636C9A6F06FD3993B069 /* Foundation.framework in Frameworks */,
+				10C062F8FD6872344D82B33F /* libPods-GodotIOSDemo.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		12E9C331B6A6DF182129A14A = {
+			isa = PBXGroup;
+			children = (
+				502DB5293EFA20F80024D134 /* Products */,
+				C4B8503D03DA56FAB278475A /* Frameworks */,
+				B3ECD62709CB7CFF66649711 /* main.m */,
+				318857B63F1038801E7C2D29 /* DemoUITests.m */,
+				6B3F18C6EA60169A35763162 /* Pods */,
+			);
+			sourceTree = "<group>";
+		};
+		502DB5293EFA20F80024D134 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				81DC825E851D796460E06690 /* GodotIOSDemo.app */,
+				1DE55DE400D7DD07ED20C295 /* GodotIOSDemoUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		5F660BA6A4CEDE9F3E59B8B6 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				985AB371847D9059CE052D6A /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
+		6B3F18C6EA60169A35763162 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				287292D8E2852DD82ABA9B00 /* Pods-GodotIOSDemo.release.xcconfig */,
+				63596624A9C48EA49ACEA409 /* Pods-GodotIOSDemo.debug.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		C4B8503D03DA56FAB278475A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				5F660BA6A4CEDE9F3E59B8B6 /* iOS */,
+				1EA0ACDDE71AF96F2FC540A0 /* libPods-GodotIOSDemo.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		0C4CF1817DF65D2068BE5A50 /* GodotIOSDemoUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D1F7D1C76E238DA6C6F32D39 /* Build configuration list for PBXNativeTarget "GodotIOSDemoUITests" */;
+			buildPhases = (
+				C9F6D14373F220582946A52A /* Sources */,
+				6C8BCD6D3CD0FC9E7716C2A0 /* Frameworks */,
+				22A0ACE3169D2682A3ADB339 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				44D36773CFB610D919395684 /* PBXTargetDependency */,
+			);
+			name = GodotIOSDemoUITests;
+			productName = GodotIOSDemoUITests;
+			productReference = 1DE55DE400D7DD07ED20C295 /* GodotIOSDemoUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		C21DCE7BF93537851426A81D /* GodotIOSDemo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C18A5FBFCF143C0E5202BE45 /* Build configuration list for PBXNativeTarget "GodotIOSDemo" */;
+			buildPhases = (
+				B5B6B665D647C7FB60F73DD3 /* [CP] Check Pods Manifest.lock */,
+				4A00DB2B77D41AAB0F2BDAD5 /* Sources */,
+				FFB3DA72896147BFB3D108D2 /* Frameworks */,
+				0A69CCC2712D027A3ADB587C /* Resources */,
+				0E2B8B4C3C660BD26084D0C9 /* [CP] Embed Pods Frameworks */,
+				B4F6CC14DD25739C6ACE5B13 /* [CP] Copy Pods Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = GodotIOSDemo;
+			productName = GodotIOSDemo;
+			productReference = 81DC825E851D796460E06690 /* GodotIOSDemo.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		1F4E07BC619EFD4748B4612B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					0C4CF1817DF65D2068BE5A50 = {
+						TestTargetID = C21DCE7BF93537851426A81D;
+					};
+					C21DCE7BF93537851426A81D = {
+						DevelopmentTeam = 2J5P3LANKG;
+					};
+				};
+			};
+			buildConfigurationList = 03531C3150DCB454508132AA /* Build configuration list for PBXProject "GodotIOSDemo" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 12E9C331B6A6DF182129A14A;
+			productRefGroup = 502DB5293EFA20F80024D134 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				C21DCE7BF93537851426A81D /* GodotIOSDemo */,
+				0C4CF1817DF65D2068BE5A50 /* GodotIOSDemoUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		0A69CCC2712D027A3ADB587C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		22A0ACE3169D2682A3ADB339 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		0E2B8B4C3C660BD26084D0C9 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-GodotIOSDemo/Pods-GodotIOSDemo-frameworks.sh",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/GodotGame/godot_flutter_example.framework/godot_flutter_example",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/godot_flutter_example.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-GodotIOSDemo/Pods-GodotIOSDemo-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		B4F6CC14DD25739C6ACE5B13 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-GodotIOSDemo/Pods-GodotIOSDemo-resources.sh",
+				"${PODS_CONFIGURATION_BUILD_DIR}/GodotEngine/GodotEnginePrivacy.bundle",
+				"${PODS_ROOT}/../../../../ios/out/debug/godot_game_lib/BundleFiles/icudt.dat",
+				"${PODS_CONFIGURATION_BUILD_DIR}/GodotGame/GodotGameResources.bundle",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GodotEnginePrivacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/icudt.dat",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GodotGameResources.bundle",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-GodotIOSDemo/Pods-GodotIOSDemo-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		B5B6B665D647C7FB60F73DD3 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-GodotIOSDemo-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		4A00DB2B77D41AAB0F2BDAD5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E0C7CC8DE68E750CDBFA7AD1 /* main.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C9F6D14373F220582946A52A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8A56D8FA70154B3376E4E2C1 /* DemoUITests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		44D36773CFB610D919395684 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = GodotIOSDemo;
+			target = C21DCE7BF93537851426A81D /* GodotIOSDemo */;
+			targetProxy = 6D33CC2352531992DD91B750 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		5C819115C37BC7C377B1FC9B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		8541250F6D790771750EFF20 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.example.godot.iosdemo.uitests;
+				SDKROOT = iphoneos;
+				TEST_TARGET_NAME = GodotIOSDemo;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		A05D3D83E36AA1985D6FDDE3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 287292D8E2852DD82ABA9B00 /* Pods-GodotIOSDemo.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				DEVELOPMENT_TEAM = 2J5P3LANKG;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIRequiresFullScreen = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = me.shiki.godot.example;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		B78A5FE2C94647F07B10E18C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.example.godot.iosdemo.uitests;
+				SDKROOT = iphoneos;
+				TEST_TARGET_NAME = GodotIOSDemo;
+			};
+			name = Debug;
+		};
+		C26750F5D8105E8639C11D23 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		FC01ABAD6B9F61541FE02F10 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 63596624A9C48EA49ACEA409 /* Pods-GodotIOSDemo.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				DEVELOPMENT_TEAM = 2J5P3LANKG;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIRequiresFullScreen = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = me.shiki.godot.example;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		03531C3150DCB454508132AA /* Build configuration list for PBXProject "GodotIOSDemo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C26750F5D8105E8639C11D23 /* Debug */,
+				5C819115C37BC7C377B1FC9B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C18A5FBFCF143C0E5202BE45 /* Build configuration list for PBXNativeTarget "GodotIOSDemo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A05D3D83E36AA1985D6FDDE3 /* Release */,
+				FC01ABAD6B9F61541FE02F10 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D1F7D1C76E238DA6C6F32D39 /* Build configuration list for PBXNativeTarget "GodotIOSDemoUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8541250F6D790771750EFF20 /* Release */,
+				B78A5FE2C94647F07B10E18C /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 1F4E07BC619EFD4748B4612B /* Project object */;
+}

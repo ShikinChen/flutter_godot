@@ -66,13 +66,15 @@ def update_csproj(path: Path) -> bool:
 
 
 PROJECT_IGNORE_PATTERNS = (
-    ".godot/", "/godot/", "/android/", "bin/", "obj/",
+    ".godot/", "/godot/", "/android/", "/ios/", "bin/", "obj/",
     "/godot.gdkey", "*.keystore", "*.jks", ".DS_Store",
 )
 CONFIG_IGNORE_PATTERNS = (
     "build/", ".gradle/", ".cxx/", ".externalNativeBuild/",
     "local.properties", "__pycache__/", "*.py[cod]", ".idea/", "*.iml", ".DS_Store",
     "/godot_android/lib/libs/", "*.aar", "*.so", "*.a", "*.dex",
+    "/godot_ios/demo/Pods/", "/godot_ios/demo/build/",
+    "/godot_ios/demo/*.xcworkspace/", "/godot_ios/demo/Podfile.lock", "xcuserdata/",
 )
 
 

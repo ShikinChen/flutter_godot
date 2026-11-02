@@ -112,6 +112,11 @@ python3 ./flutter_config/init_project.py
 
 Android 构建依赖与配置说明见 [godot_android/README.md](godot_android/README.md)。
 
+## iOS 配置
+
+iOS 引擎 XCFramework、游戏资源导出、C# NativeAOT 打包和 CocoaPods 测试 demo 见
+[godot_ios/README.md](godot_ios/README.md)。默认产物位于游戏项目的 `ios/out`。
+
 
 ## Git 忽略规则
 

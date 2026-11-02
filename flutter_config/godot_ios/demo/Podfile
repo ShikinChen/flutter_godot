@@ -1,0 +1,11 @@
+platform :ios, '15.0'
+install! 'cocoapods', :deterministic_uuids => true
+
+variant = ENV.fetch('GODOT_VARIANT', 'debug')
+raise 'GODOT_VARIANT must be debug or release' unless %w[debug release].include?(variant)
+root = File.expand_path(ENV.fetch('GODOT_IOS_OUT', '../../../ios/out'), __dir__)
+project 'GodotIOSDemo.xcodeproj'
+target 'GodotIOSDemo' do
+  pod 'GodotEngine', :path => File.join(root, variant, 'godot_lib')
+  pod 'GodotGame', :path => File.join(root, variant, 'godot_game_lib')
+end

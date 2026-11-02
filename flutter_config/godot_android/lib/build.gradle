@@ -1,0 +1,381 @@
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+}
+
+ext {
+    DEBUG_PUBLISH_ARTIFACT_ID = 'godot-debug'
+    PUBLISH_ARTIFACT_ID = 'godot'
+    TOOLS_PUBLISH_ARTIFACT_ID = 'godot-tools'
+
+    pathToRootDir = project.file("../../../godot")
+
+    libDir = rootProject.file("${pathToRootDir}/platform/android/java/lib/src/main")
+
+    supportedAbis = ["arm32", "arm64",]
+    supportedFlavors = ["template"]
+    supportedAndroidDistributions = ["android"]
+    supportedFlavorsBuildTypes = [
+            "editor"  : ["dev", "debug", "release"],
+            "template": ["dev", "debug", "release"]
+    ]
+    supportedEditions = ["standard", "mono"]
+    selectedAbis = ["arm32", "arm64"]
+}
+
+
+dependencies {
+    implementation "androidx.fragment:fragment:$versions.fragmentVersion"
+    implementation 'androidx.documentfile:documentfile:1.1.0'
+
+    testImplementation "junit:junit:4.13.2"
+}
+
+android {
+    compileSdkVersion versions.compileSdk
+    buildToolsVersion versions.buildTools
+    ndkVersion versions.ndkVersion
+
+    defaultConfig {
+        minSdkVersion versions.minSdk
+        targetSdkVersion versions.targetSdk
+
+        manifestPlaceholders = [godotLibraryVersion: getGodotLibraryVersionName()]
+    }
+
+    namespace = "org.godotengine.godot"
+
+    compileOptions {
+        sourceCompatibility versions.javaVersion
+        targetCompatibility versions.javaVersion
+    }
+
+    kotlinOptions {
+        jvmTarget = versions.javaVersion
+    }
+
+    buildFeatures {
+        aidl = true
+        buildConfig = true
+    }
+
+    buildTypes {
+        dev {
+            initWith debug
+        }
+    }
+
+    flavorDimensions = ["products"]
+    productFlavors {
+        editor {}
+        template {}
+    }
+
+    lintOptions {
+        abortOnError false
+        disable 'MissingTranslation', 'UnusedResources'
+    }
+
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/NOTICE'
+
+        // Debug symbols are kept for development within Android Studio.
+        if (shouldNotStrip()) {
+            jniLibs {
+                keepDebugSymbols += '**/*.so'
+            }
+        }
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile "${libDir}/AndroidManifest.xml"
+            java.srcDirs = ["${libDir}/java"]
+//            test.java.srcDirs = ["${libDir}/srcTest/java"]
+            res.srcDirs = ["${libDir}/res"]
+            aidl.srcDirs = ["${libDir}/aidl"]
+            assets.srcDirs = ["${libDir}/assets"]
+        }
+
+        debug.jniLibs.srcDirs = ['libs/debug']
+        dev.jniLibs.srcDirs = ['libs/dev']
+        release.jniLibs.srcDirs = ['libs/release']
+
+        // Editor jni library
+//        editorRelease.jniLibs.srcDirs = ['libs/tools/release']
+//        editorDebug.jniLibs.srcDirs = ['libs/tools/debug']
+//        editorDev.jniLibs.srcDirs = ['libs/tools/dev']
+    }
+
+    libraryVariants.all { variant ->
+        def flavorName = variant.getFlavorName()
+        if (flavorName == null || flavorName == "") {
+            throw new GradleException("Invalid product flavor: $flavorName")
+        }
+
+        def buildType = variant.buildType.name
+        if (buildType == null || buildType == "" || !supportedFlavorsBuildTypes[flavorName].contains(buildType)) {
+            throw new GradleException("Invalid build type: $buildType")
+        }
+
+        boolean devBuild = buildType == "dev"
+        boolean debugSymbols = devBuild || buildType == "debug"
+        boolean runTests = devBuild
+        boolean storeRelease = buildType == "release"
+        boolean productionBuild = storeRelease
+
+        def sconsTarget = flavorName
+        if (sconsTarget == "template") {
+            // Tests are not supported on template builds
+            runTests = false
+            switch (buildType) {
+                case "release":
+                    sconsTarget += "_release"
+                    break
+                case "debug":
+                case "dev":
+                default:
+                    sconsTarget += "_debug"
+                    break
+            }
+        }
+
+        // Update the name of the generated library
+        def outputSuffix = "${sconsTarget}"
+        if (devBuild) {
+            outputSuffix = "${outputSuffix}.dev"
+        }
+        variant.outputs.all { output ->
+            output.outputFileName = "godot-lib.${outputSuffix}.aar"
+        }
+
+        // Find scons' executable path
+        File sconsExecutableFile = null
+        def sconsName = "scons"
+        def sconsExts = (org.gradle.internal.os.OperatingSystem.current().isWindows()
+                ? [".bat", ".cmd", ".ps1", ".exe"]
+                : [""])
+        logger.debug("Looking for $sconsName executable path")
+        for (ext in sconsExts) {
+            String sconsNameExt = sconsName + ext
+            logger.debug("Checking $sconsNameExt")
+            sconsExecutableFile = org.gradle.internal.os.OperatingSystem.current().findInPath(sconsNameExt)
+            if (sconsExecutableFile != null) {
+                // We're done!
+                break
+            }
+            // Check all the options in path
+            List<File> allOptions = org.gradle.internal.os.OperatingSystem.current().findAllInPath(sconsNameExt)
+            if (!allOptions.isEmpty()) {
+                // Pick the first option and we're done!
+                sconsExecutableFile = allOptions.get(0)
+                break
+            }
+        }
+        if (sconsExecutableFile == null) {
+            throw new GradleException("Unable to find executable path for the '$sconsName' command.")
+        } else {
+            logger.debug("Found executable path for $sconsName: ${sconsExecutableFile.absolutePath}")
+        }
+
+        for (String selectedAbi : selectedAbis) {
+            if (!supportedAbis.contains(selectedAbi)) {
+                throw new GradleException("Invalid selected abi: $selectedAbi")
+            }
+
+            // Creating gradle task to generate the native libraries for the selected abi.
+            def taskName = getSconsTaskName(flavorName, buildType, selectedAbi)
+            def androidAbi = getAndroidAbi(selectedAbi)
+            def outputDir = file("libs/${buildType}/${androidAbi}")
+            def optimizeLevel = (buildType == "debug" || devBuild) ? "none" : "speed"
+            def useLto = (buildType == "release") ? "thin" : "none"
+
+            // 获取加密密钥 - 支持 salt/key/iv 格式
+            def encryptionKey = ""
+            def salt = ""
+            def key = ""
+            def iv = ""
+
+            def godotKeyFile = project.file("../../../godot.gdkey")
+            if (godotKeyFile.exists()) {
+                def keyContent = godotKeyFile.text.trim()
+                // 检查是否为 salt/key/iv 格式（支持各种格式变体）
+                if (keyContent.matches('(?s).*salt\\s*=.*') && keyContent.matches('(?s).*key\\s*=.*') && keyContent.matches('(?s).*iv\\s*=.*')) {
+                    // 定义正则表达式模式，适配各种格式（iv=、iv =、IV=等）
+                    def saltPattern = java.util.regex.Pattern.compile('^\\s*salt\\s*=\\s*(.+)', java.util.regex.Pattern.CASE_INSENSITIVE)
+                    def keyPattern = java.util.regex.Pattern.compile('^\\s*key\\s*=\\s*(.+)', java.util.regex.Pattern.CASE_INSENSITIVE)
+                    def ivPattern = java.util.regex.Pattern.compile('^\\s*iv\\s*=\\s*(.+)', java.util.regex.Pattern.CASE_INSENSITIVE)
+
+                    // 解析 salt/key/iv 格式（使用正则表达式适配不同格式）
+                    def lines = keyContent.split('\n')
+                    for (line in lines) {
+                        def saltMatcher = line =~ saltPattern
+                        if (saltMatcher.find()) {
+                            salt = saltMatcher.group(1).trim()
+                        }
+
+                        def keyMatcher = line =~ keyPattern
+                        if (keyMatcher.find()) {
+                            key = keyMatcher.group(1).trim()
+                        }
+
+                        def ivMatcher = line =~ ivPattern
+                        if (ivMatcher.find()) {
+                            iv = ivMatcher.group(1).trim()
+                        }
+                    }
+
+                    if (!salt.isEmpty() && !key.isEmpty() && !iv.isEmpty()) {
+                        encryptionKey = key // 使用 key 作为加密密钥
+                        println "Using encryption key from salt/key/iv format for ${variant.name}"
+                        println "  Salt: ${salt}"
+                        println "  Key: ${key.take(8)}..."
+                        println "  IV: ${iv}"
+                    } else {
+                        throw new GradleException("Invalid salt/key/iv format in godot.gdkey")
+                    }
+                } else {
+                    // 传统格式：直接使用作为加密密钥
+                    encryptionKey = keyContent
+                    println "Using encryption key from godot.gdkey for ${variant.name}: ${encryptionKey.take(8)}..."
+                }
+                // 确保去除换行和空白
+                encryptionKey = encryptionKey?.trim()
+            }
+
+            // 规范化，并在未从文件获得密钥时尝试使用 shell 环境变量
+            encryptionKey = encryptionKey?.trim()
+            if (!encryptionKey) {
+                def envKey = System.getenv('SCRIPT_AES256_ENCRYPTION_KEY')
+                if (envKey) {
+                    encryptionKey = envKey.trim()
+                    println "Using encryption key from environment variable for ${variant.name}: ${encryptionKey.take(8)}..."
+                }
+            }
+
+            tasks.create(name: taskName, type: Exec) {
+                executable sconsExecutableFile.absolutePath
+
+                // 构建 scons 参数列表
+                def sconsArgs = [
+                        "--directory=${pathToRootDir}",
+                        "platform=android",
+                        "store_release=${storeRelease}",
+                        "production=${productionBuild}",
+                        "dev_mode=${devBuild}",
+                        "dev_build=${devBuild}",
+                        "debug_symbols=${debugSymbols}",
+                        "optimize=${optimizeLevel}",
+                        "lto=${useLto}",
+                        "tests=${runTests}",
+                        "target=${sconsTarget}",
+                        "arch=${selectedAbi}",
+                        "module_mono_enabled=y"
+                ]
+
+                sconsArgs.add("-j" + Runtime.runtime.availableProcessors())
+                if (encryptionKey) {
+                    environment "SCRIPT_AES256_ENCRYPTION_KEY", encryptionKey
+                }
+                args sconsArgs
+                inputs.property('sconsArgs', sconsArgs)
+                inputs.property('encryptionKeyHash', java.security.MessageDigest.getInstance('SHA-256').digest((encryptionKey ?: '').getBytes('UTF-8')).encodeHex().toString())
+                inputs.files(fileTree(pathToRootDir) {
+                    include 'SConstruct', '**/SCsub', '**/SConscript', '**/*.py', '**/*.cpp', '**/*.c', '**/*.h', '**/*.hpp', '**/*.glsl', '**/*.glslinc'
+                    include 'thirdparty/swappy-frame-pacing/**/*.a'
+                    exclude '.git/**', 'bin/**', '.godot/**', '**/*.gen.*', 'platform/android/java/**'
+                })
+                outputs.file(new File(outputDir, 'libgodot_android.so'))
+                outputs.file(new File(outputDir, 'libc++_shared.so'))
+                doFirst {
+                    // 查看将传递给子进程(SCons)的环境变量
+                    def v = environment["SCRIPT_AES256_ENCRYPTION_KEY"]
+                    println "[Exec] SCRIPT_AES256_ENCRYPTION_KEY for SCons: ${v ? v.toString().take(8) + '...' : '(not set)'}"
+                    
+                    // 在 Godot 源码目录下创建空的 .gdignore 文件
+                    def godotRootDir = file(pathToRootDir)
+                    def gdignoreFile = new File(godotRootDir, ".gdignore")
+                    
+                    try {
+                        if (!gdignoreFile.exists()) {
+                            gdignoreFile.createNewFile()
+                            println "[GDIgnore] Created empty .gdignore file at ${gdignoreFile.absolutePath}"
+                        } else {
+                            println "[GDIgnore] .gdignore file already exists at ${gdignoreFile.absolutePath}"
+                        }
+                    } catch (Exception e) {
+                        println "[GDIgnore] Error creating .gdignore file: ${e.message}"
+                    }
+                }
+                doLast {
+                    // SCons 将库移动到源码工程的 libs/<variant>/<abi>，不能从 bin 混拷不同架构。
+                    def generatedLibs = new File(pathToRootDir, "platform/android/java/lib/libs/${buildType}/${androidAbi}")
+                    def godotSo = new File(generatedLibs, "libgodot_android.so")
+                    if (!godotSo.isFile()) {
+                        throw new GradleException("Native library was not generated: ${godotSo}")
+                    }
+                    copy {
+                        from generatedLibs
+                        include '*.so'
+                        into outputDir
+                    }
+                }
+            }
+
+            // Schedule the tasks so the generated libs are present before the aar file is packaged.
+            tasks["merge${flavorName.capitalize()}${buildType.capitalize()}JniLibFolders"].dependsOn taskName
+        }
+    }
+
+    publishing {
+        singleVariant("templateDebug") {
+            withSourcesJar()
+            withJavadocJar()
+        }
+        singleVariant("templateRelease") {
+            withSourcesJar()
+            withJavadocJar()
+        }
+        singleVariant("editorRelease") {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
+}
+
+def getSconsTaskName(String flavor, String buildType, String abi) {
+    return "compileGodotNativeLibs" + flavor.capitalize() + buildType.capitalize() + abi.capitalize()
+}
+
+def getAndroidAbi(String arch) {
+    switch (arch) {
+        case "arm64":
+            return "arm64-v8a"
+        case "arm32":
+            return "armeabi-v7a"
+        case "x86_64":
+            return "x86_64"
+        case "x86_32":
+        case "x86":
+            return "x86"
+        default:
+            return arch
+    }
+}
+
+def getNdkTriple(String androidAbi) {
+    switch (androidAbi) {
+        case "arm64-v8a":
+            return "aarch64-linux-android"
+        case "armeabi-v7a":
+            return "arm-linux-androideabi"
+        case "x86_64":
+            return "x86_64-linux-android"
+        case "x86":
+            return "i686-linux-android"
+        default:
+            return androidAbi
+    }
+}
+

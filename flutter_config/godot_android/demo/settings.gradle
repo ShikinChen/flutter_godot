@@ -1,0 +1,24 @@
+// Standalone entry point for the demo, sharing the Godot export configuration.
+pluginManagement {
+    apply from: '../../../android/build/config.gradle'
+
+    plugins {
+        id 'com.android.application' version versions.androidGradlePlugin
+        id 'com.android.library' version versions.androidGradlePlugin
+        id 'org.jetbrains.kotlin.android' version versions.kotlinVersion
+    }
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+rootProject.name = 'godot-demo'
+
+include ':assetPackInstallTime', ':godot:lib', ':godot_android:game_lib'
+project(':assetPackInstallTime').projectDir = file('../../../android/build/assetPackInstallTime')
+project(':godot').projectDir = file('..')
+project(':godot_android').projectDir = file('..')
+project(':godot:lib').projectDir = file('../lib')
+project(':godot_android:game_lib').projectDir = file('../game_lib')

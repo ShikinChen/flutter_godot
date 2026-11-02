@@ -1,0 +1,216 @@
+// Gradle build config for Godot Engine's Android port.
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
+
+apply from: file('../../../android/build/config.gradle')
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        String[] mavenRepos = getGodotPluginsMavenRepos()
+        if (mavenRepos != null) {
+            mavenRepos.each { repoUrl -> maven { url repoUrl } }
+        }
+    }
+}
+
+
+ext {
+    projDir = file("../../../android/build")
+}
+
+configurations {
+    // Initializes a placeholder for the devImplementation dependency configuration.
+    devImplementation {}
+    // Initializes a placeholder for the monoImplementation dependency configuration.
+    monoImplementation {}
+}
+
+dependencies {
+    implementation "androidx.fragment:fragment:$versions.fragmentVersion"
+    implementation "androidx.core:core-splashscreen:$versions.splashscreenVersion"
+
+    implementation "com.google.code.gson:gson:2.11.0"
+
+    implementation project(":godot_android:game_lib")
+
+//    debugImplementation fileTree(dir: "${projDir}/godot/game_lib/game_lib-standard", include: ['**/*.jar', '*.aar'])
+
+//    debugImplementation project(":godot_lib_debug")
+}
+
+android {
+    compileSdkVersion versions.compileSdk
+    buildToolsVersion versions.buildTools
+    ndkVersion versions.ndkVersion
+
+    compileOptions {
+        sourceCompatibility versions.javaVersion
+        targetCompatibility versions.javaVersion
+    }
+
+    kotlinOptions {
+        jvmTarget = versions.javaVersion
+    }
+
+    assetPacks = [":assetPackInstallTime"]
+
+    namespace = 'com.godot.game'
+
+    defaultConfig {
+        // The default ignore pattern for the 'assets' directory includes hidden files and directories which are used by Godot projects.
+        aaptOptions {
+            ignoreAssetsPattern "!.svn:!.git:!.gitignore:!.ds_store:!*.scc:<dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"
+        }
+
+        ndk {
+            debugSymbolLevel 'NONE'
+            String[] export_abi_list = getExportEnabledABIs()
+            abiFilters export_abi_list
+        }
+
+        // Feel free to modify the application id to your own.
+        applicationId getExportPackageName()
+        versionCode getExportVersionCode()
+        versionName getExportVersionName()
+        minSdkVersion getExportMinSdkVersion()
+        targetSdkVersion getExportTargetSdkVersion()
+
+        missingDimensionStrategy 'products', 'template'
+    }
+
+    lintOptions {
+        abortOnError false
+        disable 'MissingTranslation', 'UnusedResources'
+    }
+
+    ndkVersion versions.ndkVersion
+
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/NOTICE'
+
+        // Debug symbols are kept for development within Android Studio.
+        if (shouldNotStrip()) {
+            jniLibs {
+                keepDebugSymbols += '**/*.so'
+            }
+        }
+
+        jniLibs {
+            // Setting this to true causes AGP to package compressed native libraries when building the app
+            // For more background, see:
+            // - https://developer.android.com/build/releases/past-releases/agp-3-6-0-release-notes#extractNativeLibs
+            // - https://stackoverflow.com/a/44704840
+            useLegacyPackaging shouldUseLegacyPackaging()
+        }
+
+        // Always select Godot's version of libc++_shared.so in case deps have their own
+        pickFirst 'lib/x86/libc++_shared.so'
+        pickFirst 'lib/x86_64/libc++_shared.so'
+        pickFirst 'lib/armeabi-v7a/libc++_shared.so'
+        pickFirst 'lib/arm64-v8a/libc++_shared.so'
+    }
+
+    signingConfigs {
+        debug {
+            if (hasCustomDebugKeystore()) {
+                storeFile new File(getDebugKeystoreFile())
+                storePassword getDebugKeystorePassword()
+                keyAlias getDebugKeyAlias()
+                keyPassword getDebugKeystorePassword()
+            }
+        }
+
+        release {
+            File keystoreFile = new File(getReleaseKeystoreFile())
+            if (keystoreFile.isFile()) {
+                storeFile keystoreFile
+                storePassword getReleaseKeystorePassword()
+                keyAlias getReleaseKeyAlias()
+                keyPassword getReleaseKeystorePassword()
+            }
+        }
+    }
+
+    buildFeatures {
+        buildConfig = true
+    }
+
+    buildTypes {
+
+        debug {
+            // Signing and zip-aligning are skipped for prebuilt builds, but
+            // performed for Godot gradle builds.
+            zipAlignEnabled shouldZipAlign()
+            if (shouldSign()) {
+                signingConfig signingConfigs.debug
+            } else {
+                signingConfig null
+            }
+            packagingOptions {
+                doNotStrip "*/arm64-v8a/*.so"
+                doNotStrip "*/armeabi-v7a/*.so"
+            }
+        }
+
+        dev {
+            initWith debug
+            // Signing and zip-aligning are skipped for prebuilt builds, but
+            // performed for Godot gradle builds.
+            zipAlignEnabled shouldZipAlign()
+            if (shouldSign()) {
+                signingConfig signingConfigs.debug
+            } else {
+                signingConfig null
+            }
+            packagingOptions {
+                doNotStrip "*/arm64-v8a/*.so"
+                doNotStrip "*/armeabi-v7a/*.so"
+            }
+        }
+
+        release {
+            // Signing and zip-aligning are skipped for prebuilt builds, but
+            // performed for Godot gradle builds.
+            zipAlignEnabled shouldZipAlign()
+            if (shouldSign()) {
+                signingConfig signingConfigs.release
+            } else {
+                signingConfig null
+            }
+        }
+    }
+
+    flavorDimensions 'edition'
+
+    productFlavors {
+        standard {
+            getIsDefault().set(true)
+        }
+        mono {}
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile "AndroidManifest.xml"
+            java.srcDirs = ["src"]
+            res.srcDirs = ["res", "${projDir}/res"]
+            aidl.srcDirs = []
+            assets.srcDirs = []
+        }
+        debug.jniLibs.srcDirs = []
+        dev.jniLibs.srcDirs = []
+        release.jniLibs.srcDirs = []
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            String filenameSuffix = variant.flavorName == "mono" ? variant.name : variant.buildType.name
+            output.outputFileName = "android_${filenameSuffix}.apk"
+        }
+    }
+}

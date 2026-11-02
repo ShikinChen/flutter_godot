@@ -1,0 +1,13 @@
+apply plugin: 'maven-publish'
+
+configurations.maybeCreate("default")
+
+// 检查当前目录中的 AAR 和 JAR 文件
+def currentDirFiles = file('./').listFiles()
+if (currentDirFiles != null) {
+    currentDirFiles.findAll {
+        it.isFile() && (it.name.endsWith('.aar') || it.name.endsWith('.jar'))
+    }.each {
+        artifacts.add("default", file(it.name))
+    }
+}

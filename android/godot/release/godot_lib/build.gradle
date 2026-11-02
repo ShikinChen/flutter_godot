@@ -1,0 +1,3 @@
+// Only expose the engine AAR, excluding adjacent native build outputs.
+configurations.maybeCreate("default")
+artifacts.add("default", file("godot-lib.template_release.aar"))

@@ -23,19 +23,14 @@ class _MyAppState extends State<MyApp> {
           gameWidth: 1080,
           gameHeight: 1920,
           placeholderWidget: const Center(child: CircularProgressIndicator()),
-          errorWidget: const Center(
-            child: Text('Godot 初始化失败，请检查 Android 日志与游戏资源'),
-          ),
-          initCallback: (controller) =>
-              setState(() => _controller = controller),
+          errorWidget: const Center(child: Text('Godot 初始化失败，请检查 Android 日志与游戏资源')),
+          initCallback: (controller) => setState(() => _controller = controller),
         ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: _controller == null
               ? null
               : () async {
-                  await _controller!.sendPlatformEventMsg(
-                    msg: '{"type":"ToScene","data":{"sceneName":"show_scene"}}',
-                  );
+                  await _controller!.sendPlatformEventMsg(msg: '{"type":"ToScene","data":{"sceneName":"page_a"}}');
                 },
           label: const Text('切换场景'),
           icon: const Icon(Icons.play_arrow),

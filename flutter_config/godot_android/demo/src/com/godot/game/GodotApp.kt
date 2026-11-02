@@ -60,7 +60,7 @@ class GodotApp : GodotActivity() {
 
         val initBtn = buttonsLayout.findViewById<Button>(R.id.btn_init)
         initBtn.setOnClickListener {
-            val msg = GodotTestEventMsg(type = "ToScene", data = mapOf("sceneName" to "show_scene"))
+            val msg = GodotTestEventMsg(type = "ToScene", data = mapOf("sceneName" to "page_a"))
             androidEventPlugin.sendPlatformEventMsg(gson.toJson(msg))
         }
     }

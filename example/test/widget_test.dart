@@ -14,7 +14,7 @@ void main() {
         });
     await tester.pumpWidget(const MyApp());
     await tester.pumpAndSettle();
-    expect(find.text('Godot Texture 示例'), findsOneWidget);
+    expect(find.text('Godot 嵌入示例'), findsOneWidget);
     expect(find.textContaining('Godot 初始化失败'), findsOneWidget);
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(const MethodChannel('flutter_godot'), null);

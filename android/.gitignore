@@ -10,10 +10,4 @@
 
 # Godot exports: keep Gradle wrappers, ignore AARs and native build outputs.
 # Layout: godot/{debug,release}/{godot_game_lib,godot_lib}/
-/godot/**
-!/godot/**/
-!/godot/**/build.gradle
-!/godot/**/build.gradle.kts
-/godot/**/.gradle/
-/godot/**/build/
-/godot/**/.cxx/
+/godot

@@ -8,6 +8,7 @@ class GodotController {
 
   int _textureId = -1;
 
+  /// Android texture ID; on iOS this is a native view session token.
   int get textureId => _textureId;
 
   FlutterGodotPlatform getPlatform() {
@@ -35,6 +36,7 @@ class GodotController {
     if (id >= 0) await getPlatform().release(textureId: id);
   }
 
+  /// Android input helper. iOS GodotView receives native touch events directly.
   Future<bool> sendTap({required double x, required double y}) {
     if (_textureId < 0) return Future.value(false);
     return getPlatform().sendTap(textureId: textureId, x: x, y: y);

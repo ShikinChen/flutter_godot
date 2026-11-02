@@ -1,5 +1,5 @@
 name: flutter_godot
-description: "Embed Android Godot rendering in Flutter textures with input and platform messages."
+description: "Embed Godot in Flutter using Android textures or iOS native views with platform messages."
 version: 0.0.1
 homepage:
 

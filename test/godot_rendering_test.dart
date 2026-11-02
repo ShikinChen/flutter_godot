@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_godot/flutter_godot.dart';
 import 'package:flutter_godot/flutter_godot_method_channel.dart';
@@ -83,5 +84,37 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('failed'), findsOneWidget);
+  });
+
+  testWidgets('iOS embeds a native view and initializes it only once', (
+    tester,
+  ) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    addTearDown(() => debugDefaultTargetPlatformOverride = null);
+    final messenger =
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    messenger.setMockMethodCallHandler(
+      SystemChannels.platform_views,
+      (_) async => null,
+    );
+    addTearDown(
+      () => messenger.setMockMethodCallHandler(
+        SystemChannels.platform_views,
+        null,
+      ),
+    );
+    var initialized = 0;
+    await tester.pumpWidget(
+      MaterialApp(home: GodotView(initCallback: (_) => initialized++)),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(UiKitView), findsOneWidget);
+    expect(find.byType(Texture), findsNothing);
+    expect(initialized, 1);
+    expect(calls.where((call) => call.method == 'initGodot'), hasLength(1));
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpAndSettle();
+    expect(calls.where((call) => call.method == 'release'), hasLength(1));
+      debugDefaultTargetPlatformOverride = null;
   });
 }

@@ -1,11 +1,11 @@
 # flutter_godot
 
-将 Godot 游戏作为 Flutter `Texture` 嵌入页面的插件。渲染业务迁移自同级 `flutter_godot_dev`，保留当前 Android 包名 `me.shiki.flutter_godot` 和 MethodChannel 名称 `flutter_godot`。
+将 Godot 游戏嵌入 Flutter 页面：Android 使用 `Texture`，iOS 使用 `UiKitView`。保留当前 Android 包名 `me.shiki.flutter_godot` 和 MethodChannel 名称 `flutter_godot`。
 
 ## 支持范围
 
 - Android：Godot 引擎初始化、OpenGL ES 3 渲染、Flutter Texture 显示、点击输入、Flutter → Godot 字符串消息。
-- iOS：保留版本查询接口，尚未实现 Godot 渲染；其他桌面平台和 Web 尚未实现。
+- iOS：通过 CocoaPods 引入 GodotEngine / GodotGame，以 UIKit 原生视图显示游戏，支持原生触摸和 Flutter → Godot 消息。尚未实现 iOS Flutter Texture；其他桌面平台和 Web 尚未实现。
 - 当前为单进程单 Godot 会话，只能创建一个 `GodotView`。销毁后需要重启应用再创建，不能同时展示多个实例。
 
 ## 环境与依赖
@@ -74,6 +74,86 @@ android {
 
 保留 `.godot` 等导出资源，否则可能出现资源加载失败或黑屏。插件依据 debug/release 构建类型选择游戏及引擎 AAR；自定义构建类型需配置对应的 `matchingFallbacks`。
 
+## 接入 iOS：在插件 Podspec 引入 Godot
+
+引擎、游戏源码、PCK、C# AOT 动态框架和 ICU 数据统一由
+[ios/flutter_godot.podspec](ios/flutter_godot.podspec) 声明。宿主 Podfile 只需要 Flutter 默认的
+`flutter_install_all_ios_pods`，无需额外声明 GodotEngine / GodotGame，也无需登记 Flutter assets 或手动拖入 Xcode。
+
+CocoaPods 文件路径相对于插件目录，因此先将游戏的 `ios/out` 同步到插件的 `ios/godot`：
+
+```sh
+# 在 flutter_godot 插件根目录执行
+python3 ios/sync_godot.py \
+  /Users/shiki/Workspace/workspace_godot/mydemo/godot_flutter_example/ios/out
+```
+
+默认同步 debug，产物目录如下；`ios/godot` 为生成目录，已加入 Git 忽略规则。
+
+```text
+ios/godot/debug/
+├── godot_lib/          # GodotEngine.xcframework、隐私清单、许可证
+└── godot_game_lib/     # Sources、Resources、Frameworks、BundleFiles
+```
+
+同步脚本只复制产物，不修改 Godot 源项目。需要完整本地目录，目录符号链接不会被 CocoaPods 的源码扫描器递归展开。
+重新导出游戏或编译引擎后，重新执行同步脚本，再运行 `pod install`。
+
+Podspec 中的关键配置：
+
+```ruby
+godot_variant = ENV.fetch('GODOT_VARIANT', 'debug')
+godot_root = "godot/#{godot_variant}"
+# 在 Pod::Spec.new 中
+s.source_files = 'flutter_godot/Sources/flutter_godot/**/*.swift',
+                 "#{godot_root}/godot_game_lib/Sources/*.{h,mm}"
+s.vendored_frameworks = "#{godot_root}/godot_lib/GodotEngine.xcframework",
+                        "#{godot_root}/godot_game_lib/Frameworks/*.xcframework"
+```
+
+当前 iOS 使用 CocoaPods，最低 iOS 15。example 的 `pubspec.yaml` 已关闭此应用的 SwiftPM，
+并使用 `use_frameworks! :linkage => :static`。在其他 Flutter 宿主复用时也需要启用 CocoaPods。
+示例的 `Flutter/Debug.xcconfig` 和 `Release.xcconfig` 在 `Generated.xcconfig` 后包含 Pods 配置，
+使 Podspec 自动计算的模拟器架构配置生效。当前引擎支持 arm64 真机和 arm64 模拟器；
+Intel 模拟器需要先构建包含 x86_64 的引擎产物。
+
+运行 example：
+
+```sh
+flutter pub get
+cd example/ios
+pod install
+open Runner.xcworkspace
+# 或回到 example 目录执行 flutter run -d <设备ID>
+```
+
+Release 需先生成 Godot 的 `ios/out/release`，再执行：
+
+```sh
+# 插件根目录
+python3 ios/sync_godot.py /path/to/game/ios/out --variant release
+cd example/ios
+GODOT_VARIANT=release pod install
+cd ..
+GODOT_VARIANT=release flutter build ios --release --no-codesign
+```
+
+`--variant both` 可同步 debug 和 release；Podspec 的 `GODOT_VARIANT` 选择是 **Pod 安装时选择**，
+不是 Xcode 自动切换。默认 debug，切换或更新产物后需重新安装 Pods。
+
+Flutter 中继续使用同一个 `GodotView` 和 `GodotController.sendPlatformEventMsg`。
+iOS 通过原生触摸接收点击/拖动，`sendTap` 只适用于 Android；iOS 画面尺寸随 UIView 布局变化，
+由 Godot 的 viewport/stretch 配置处理。控制器的 `textureId` 在 iOS 仅作内部会话标识，不能交给 `Texture`。
+iOS 需要通过 `GodotView` 创建原生视图，直接调用控制器 `init` 不会创建视图。
+
+初始化回调表示原生控制器已挂载；场景信号尚未连接时发送消息会返回 false，调用方可稍后重试。
+宿主背景色通过 `Scaffold.backgroundColor` 设置；游戏需开启透明 viewport，原生库需设置非 opaque 渲染层。
+当前游戏已配置透明背景。原生库处理前后台暂停/恢复，插件在卸载时暂停并解除控制器挂载。
+Godot → Flutter 回调尚未接入 Dart 公共 API。
+
+参考：[CocoaPods Podspec 文件声明](https://guides.cocoapods.org/syntax/podspec.html)、
+[Flutter iOS 原生视图](https://docs.flutter.dev/platform-integration/ios/platform-views)。
+
 ## Flutter 使用
 
 统一导入入口为 `lib/flutter_godot.dart`，导出 `GodotView`、`GodotController` 和 `GodotState`：
@@ -102,7 +182,7 @@ class GamePage extends StatelessWidget {
 }
 ```
 
-`GodotView` 需要有限的宽高约束；放在 `Column` 中时使用 `Expanded` 或 `SizedBox`。画面按组件区域拉伸，点击坐标按实际组件尺寸映射至 `gameWidth × gameHeight`。当前仅转发单次点击（Android DOWN/UP），未实现拖动、多点触控或键盘输入。
+`GodotView` 需要有限的宽高约束；放在 `Column` 中时使用 `Expanded` 或 `SizedBox`。画面按组件区域拉伸，点击坐标按实际组件尺寸映射至 `gameWidth × gameHeight`。Android 当前仅转发单次点击（DOWN/UP），未实现拖动、多点触控或键盘输入；iOS 使用原生视图直接接收触摸。
 
 `initCallback` 在纹理注册成功后调用，比源项目在初始化前回调更晚；它不表示 Godot 已渲染首帧。Dart 初始化异常会显示 `errorWidget`，渲染线程中的引擎/EGL 错误需查看 Android 日志。
 
@@ -113,7 +193,7 @@ await controller.sendPlatformEventMsg(
 );
 ```
 
-`GodotView` 在卸载时自动释放纹理。自行调用 `GodotController.init()` 管理纹理的使用者，需要自行 `await controller.dispose()`。渲染尺寸在创建时确定，不支持运行中修改。
+`GodotView` 在卸载时自动释放 Android 纹理或解除 iOS 原生视图挂载。Android 中自行调用 `GodotController.init()` 管理纹理的使用者，需要自行 `await controller.dispose()`。Android 渲染尺寸在创建时确定，不支持运行中修改。
 
 ## Godot 消息约定
 

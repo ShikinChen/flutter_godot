@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_godot/godot_controller.dart';
 import 'package:flutter_godot/godot_state.dart';
 
@@ -35,10 +37,14 @@ class _State extends State<GodotView> {
 
   int get gameHeight => widget.gameHeight;
 
+  bool get _usesNativeIOSView =>
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
+
   @override
   void initState() {
     super.initState();
-    newTexture();
+    _controller = GodotController();
+    if (!_usesNativeIOSView) newTexture();
   }
 
   @override
@@ -50,6 +56,22 @@ class _State extends State<GodotView> {
   @override
   Widget build(BuildContext context) {
     if (_failed) return widget.errorWidget ?? const SizedBox.shrink();
+    if (_usesNativeIOSView) {
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          UiKitView(
+            viewType: 'flutter_godot/ios_view',
+            layoutDirection: TextDirection.ltr,
+            creationParams: {'gameWidth': gameWidth, 'gameHeight': gameHeight},
+            creationParamsCodec: const StandardMessageCodec(),
+            onPlatformViewCreated: (_) => newTexture(),
+          ),
+          if (_controller.state != GodotState.InitSuccess)
+            widget.placeholderWidget ?? const SizedBox.shrink(),
+        ],
+      );
+    }
     if (_controller.state != GodotState.InitSuccess) {
       if (_controller.state == GodotState.Init) {
         return widget.placeholderWidget ?? Container();
@@ -79,7 +101,7 @@ class _State extends State<GodotView> {
   }
 
   Future<void> newTexture() async {
-    _controller = GodotController();
+    if (!mounted) return;
     try {
       await _controller.init(
         gameWidth: widget.gameWidth,

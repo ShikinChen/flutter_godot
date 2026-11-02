@@ -209,9 +209,9 @@ def copy_if_needed(src: Path, out_dir: Path) -> Optional[Path]:
         return None
 
 def copy_dir_variant(src_dir: Path, out_root: Path, variant: str) -> Optional[Path]:
-    """将目录按变体复制到 out/<variant>/godot/ 下，返回目标路径。"""
+    """将目录按变体复制到 android/out/<variant>/ 下，返回目标路径。"""
     try:
-        dest_dir = out_root / variant / "godot" / src_dir.name
+        dest_dir = out_root / variant / src_dir.name
         shutil.copytree(src_dir, dest_dir, dirs_exist_ok=True)
         return dest_dir
     except Exception as e:
@@ -389,12 +389,12 @@ def main() -> int:
         if "assembleTemplate" in t:
             record_godot_key(project_root, out_root)
 
-        # 1) 定位 AAR 并仅复制到 out/<variant>/godot/godot_game_lib（不再复制到 out 根目录）
+        # 1) 定位 AAR 并仅复制到 android/out/<variant>/godot_game_lib（不再复制到 out 根目录）
         found = False
         for cand in aar_output_paths(android_dir, args.module_path, variant):
             if cand.exists():
                 print_info(f"AAR 输出({variant}): {cand}")
-                variant_lib_dir = out_root / variant / "godot" / "godot_game_lib"
+                variant_lib_dir = out_root / variant / "godot_game_lib"
                 dst2 = copy_if_needed(cand, variant_lib_dir)
                 if dst2:
                     print_info(f"已复制到: {dst2}")
@@ -404,7 +404,7 @@ def main() -> int:
             print_error(f"未找到 AAR 文件（{variant}），请检查模块路径与构建输出目录。")
             return 1
 
-        # 2) 复制目录 buildScript/godot/godot_game_lib -> out/<variant>/godot/godot_game_lib
+        # 2) 复制目录 buildScript/godot/godot_game_lib -> android/out/<variant>/godot_game_lib
         script_base = Path(__file__).resolve().parent
         src_game_lib_dir = script_base / "godot" / "godot_game_lib"
         if src_game_lib_dir.exists():
@@ -414,11 +414,11 @@ def main() -> int:
         else:
             print_warn(f"未找到目录: {src_game_lib_dir}")
 
-        # 3) 复制依赖库 android/build/godot/game_lib/libs/<variant> -> out/<variant>/godot/godot_lib
+        # 3) 复制依赖库 android/build/godot/game_lib/libs/<variant> -> android/out/<variant>/godot_lib
         # 处理 android_dir 可能已是 .../android/build 的情况，避免出现 build/build
         build_root = android_dir if android_dir.name == "build" else (android_dir / "build")
         src_libs_variant = android_dir / "libs" / variant
-        dst_libs_dir = out_root / variant / "godot" / "godot_lib"
+        dst_libs_dir = out_root / variant / "godot_lib"
         if src_libs_variant.exists():
             merged = copy_dir_contents(src_libs_variant, dst_libs_dir)
             if merged:
@@ -426,9 +426,9 @@ def main() -> int:
         else:
             print_warn(f"未找到依赖库目录: {src_libs_variant}")
 
-        # 4) 复制 :godot:lib 模块的 AAR 文件 android/build/godot/lib/build/outputs/aar -> out/<variant>/godot/godot_lib
+        # 4) 复制 :godot:lib 模块的 AAR 文件 android/build/godot/lib/build/outputs/aar -> android/out/<variant>/godot_lib
         src_lib_aar_dir = script_base.parent / "lib" / "build" / "outputs" / "aar"
-        dst_lib_aar_dir = out_root / variant / "godot" / "godot_lib"
+        dst_lib_aar_dir = out_root / variant / "godot_lib"
         if src_lib_aar_dir.exists():
             for aar_file in src_lib_aar_dir.glob("*.aar"):
                 # 根据变体过滤 AAR 文件

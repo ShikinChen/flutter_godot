@@ -144,7 +144,7 @@ def parse_args():
                         help="Gradle 模块路径（默认 :godot_android:game_lib）")
     parser.add_argument("--out-dir",
                         default=None,
-                        help="AAR/目录/依赖库复制到该目录下的按变体子目录（out/<variant>/godot/...）")
+                        help="AAR/目录/依赖库复制到该目录下的按变体子目录（android/out/<variant>/godot_game_lib 和 godot_lib）")
     parser.add_argument("--no-daemon",
                         action="store_true",
                         help="Gradle --no-daemon")

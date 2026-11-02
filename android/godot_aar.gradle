@@ -1,0 +1,14 @@
+// Shared by the prebuilt Godot modules. Keep this outside the export directory
+// so replacing android/godot does not remove the consumable configuration.
+def aarFiles = fileTree(dir: projectDir, include: ['*.aar']).files
+if (aarFiles.size() != 1) {
+    throw new GradleException("${project.path}: expected exactly one AAR in ${projectDir}, found ${aarFiles.size()}")
+}
+
+configurations.create('default') {
+    canBeConsumed = true
+    canBeResolved = false
+}
+
+// Ignore adjacent raw native libraries; the AAR carries its packaged libraries.
+artifacts.add('default', aarFiles.first())

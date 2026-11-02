@@ -32,3 +32,8 @@ project(":godot_game_lib_debug").projectDir = File(godotRoot, "debug/godot_game_
 project(":godot_game_lib_release").projectDir = File(godotRoot, "release/godot_game_lib")
 project(":godot_lib_debug").projectDir = File(godotRoot, "debug/godot_lib")
 project(":godot_lib_release").projectDir = File(godotRoot, "release/godot_lib")
+
+// Use the shared wrapper even when exported directories have no build.gradle.
+listOf(":godot_game_lib_debug", ":godot_game_lib_release", ":godot_lib_debug", ":godot_lib_release").forEach {
+    project(it).buildFileName = "../../../godot_aar.gradle"
+}

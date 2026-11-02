@@ -17,14 +17,14 @@
 ```text
 android/godot/
 ├── debug/
-│   ├── godot_game_lib/    # build.gradle + game_lib-mono-debug.aar
-│   └── godot_lib/         # build.gradle + godot-lib.template_debug.aar
+│   ├── godot_game_lib/    # game_lib-mono-debug.aar
+│   └── godot_lib/         # godot-lib.template_debug.aar
 └── release/
-    ├── godot_game_lib/    # build.gradle + game_lib-mono-release.aar
-    └── godot_lib/         # build.gradle + godot-lib.template_release.aar
+    ├── godot_game_lib/    # game_lib-mono-release.aar
+    └── godot_lib/         # godot-lib.template_release.aar
 ```
 
-Debug 同时使用 debug 游戏和引擎，Release 同时使用 release 游戏和引擎，避免混用游戏资源与原生运行时。替换构建产物时保留各目录的 `build.gradle` 包装模块。引擎模块仅导出对应 AAR，旁边的 `arm64-v8a/` 原始构建文件不会额外参与打包。
+Debug 同时使用 debug 游戏和引擎，Release 同时使用 release 游戏和引擎，避免混用游戏资源与原生运行时。四个模块统一使用产物目录之外的 `android/godot_aar.gradle`，因此导出目录无需包含 `build.gradle`，替换产物也不会丢失模块配置。每个模块目录只放一个 AAR，缺少或重复时会明确报错。引擎模块仅导出对应 AAR，旁边的 `arm64-v8a/` 原始构建文件不会额外参与打包。
 
 当前引擎 AAR 的 manifest 标记为 `custom_build`，渲染适配层已实现其 `blockingExitRenderer(timeout)` 接口。游戏与引擎的实际版本以当前 AAR 为准；重新构建时需统一游戏导出版本、引擎版本与 `flutter_config` 初始化脚本使用的源码版本。
 
@@ -51,7 +51,13 @@ project(":godot_game_lib_debug").projectDir = File(godotRoot, "debug/godot_game_
 project(":godot_game_lib_release").projectDir = File(godotRoot, "release/godot_game_lib")
 project(":godot_lib_debug").projectDir = File(godotRoot, "debug/godot_lib")
 project(":godot_lib_release").projectDir = File(godotRoot, "release/godot_lib")
+
+listOf(":godot_game_lib_debug", ":godot_game_lib_release", ":godot_lib_debug", ":godot_lib_release").forEach {
+    project(it).buildFileName = "../../../godot_aar.gradle"
+}
 ```
+
+`buildFileName` 相对于各模块的 `projectDir`，上述布局下均指向插件的 `android/godot_aar.gradle`。
 
 宿主 `android/app/build.gradle.kts` 的 `android` 中配置：
 

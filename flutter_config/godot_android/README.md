@@ -145,10 +145,10 @@ Gradle 工程位置影响；统一入口与单独运行 `build_android_lib.py` �
 
 ```text
 android/out/
-├── debug/godot/
+├── debug/
 │   ├── godot_game_lib/    # 游戏库 AAR 和引用配置
 │   └── godot_lib/         # 引擎 AAR 和依赖库
-└── release/godot/
+└── release/
     ├── godot_game_lib/
     └── godot_lib/
 ```
